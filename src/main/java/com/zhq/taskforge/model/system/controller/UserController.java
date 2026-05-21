@@ -6,6 +6,7 @@ import com.zhq.taskforge.common.ResultCode;
 import com.zhq.taskforge.security.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "用户模块")
 public class UserController {
 
-
-
     @GetMapping("/me")
     @Operation(summary = "获取当前登录用户的信息")
+    @PreAuthorize("hasAnyAuthority('system:user:list')")
     public Result getCurrentUserInfo(@AuthenticationPrincipal LoginUser userDetails) {
         if (userDetails == null) {
             return new Result(ResultCode.SUCCESS, "用户未登录");

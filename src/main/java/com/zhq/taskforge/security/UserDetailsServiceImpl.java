@@ -2,6 +2,7 @@ package com.zhq.taskforge.security;
 
 import com.zhq.taskforge.config.BusinessException;
 import com.zhq.taskforge.model.system.entity.SysUser;
+import com.zhq.taskforge.model.system.mapper.SysMenuMapper;
 import com.zhq.taskforge.model.system.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,11 +10,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     SysUserService sysUserService;
+    @Autowired
+    SysMenuMapper sysMenuMapper;
 
     @Override
     public UserDetails loadUserByUsername(String name) throws  UsernameNotFoundException{
@@ -24,12 +29,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if(userByName.getStatus() != null && userByName.getStatus() == 1){
             throw  new BusinessException("用户已停用");
         }
+        List<String> permissions = sysMenuMapper.selectPermsByUserId(userByName.getUserId());
         LoginUser loginUser = new LoginUser();
         loginUser.setName(userByName.getName());
         loginUser.setNickName(userByName.getNickName());
         loginUser.setPassword(userByName.getPassword());
         loginUser.setStatus(userByName.getStatus());
         loginUser.setUserId(userByName.getUserId());
+        loginUser.setPermissions(permissions);
         return loginUser;
     }
 
