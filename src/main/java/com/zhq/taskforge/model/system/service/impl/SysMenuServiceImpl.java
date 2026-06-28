@@ -1,6 +1,8 @@
 package com.zhq.taskforge.model.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zhq.taskforge.auth.vo.MetaVo;
+import com.zhq.taskforge.auth.vo.RouterVo;
 import com.zhq.taskforge.common.TreeSelect;
 import com.zhq.taskforge.config.BusinessException;
 import com.zhq.taskforge.model.system.entity.SysMenu;
@@ -12,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +44,7 @@ public class SysMenuServiceImpl implements SysMenuService {
         }
 
         qw.orderByAsc(SysMenu::getParentId)
-                .orderByAsc(SysMenu::getMenuOrder);
+                .orderByAsc(SysMenu::getOrderNum);
 
        return  sysMenuMapper.selectList(qw);
     }
@@ -91,7 +93,7 @@ public class SysMenuServiceImpl implements SysMenuService {
         checkExternalLink(sysMenu);
 
         //3.插入数据
-        sysMenu.setCreateTime(LocalDate.now());
+        sysMenu.setCreateTime(LocalDateTime.now());
         sysMenuMapper.insert(sysMenu);
     }
 
@@ -112,7 +114,7 @@ public class SysMenuServiceImpl implements SysMenuService {
         }
 
         //4.更新时间
-        sysMenu.setUpdateTime(LocalDate.now());
+        sysMenu.setUpdateTime(LocalDateTime.now());
         //5.更新
         sysMenuMapper.updateById(sysMenu);
 
@@ -132,6 +134,99 @@ public class SysMenuServiceImpl implements SysMenuService {
             throw  new BusinessException("该菜单分配给角色，无法删除");
         }
         sysMenuMapper.deleteById(menuId);
+    }
+
+    @Override
+    public List<SysMenu> selectMenuTreeByUserId(Long userId) {
+        //1.判断是否为空
+        if(userId == null){
+            throw new BusinessException("userId不能为空");
+        }
+        //2.userId = 1则为超级管理员，拥有所有的权限。否则就是普通人员
+        List<SysMenu> menus;
+        if(Long.valueOf(1L).equals(userId)){
+            menus = sysMenuMapper.selectMenuTreeAll();
+        }else {
+            menus = sysMenuMapper.selectMenuTreeByUserId(userId);
+        }
+    return buildMenuTree(menus);
+
+    }
+
+    @Override
+    public List<RouterVo> buildMenus(List<SysMenu> menus) {
+        //1.新建一个RouterVo列表对象
+        List<RouterVo> routerVoList = new ArrayList<>();
+
+        /** 特定格式：
+         *
+         {
+         "name": "System",
+         "path": "/system",
+         "component": "Layout",
+         "meta": {
+         "title": "系统管理",
+         "icon": "system",
+         "noCache": false
+         },
+         "children": []
+         }
+         */
+        //2.遍历menus，新建RouterVo对象，并为其赋值
+        for(SysMenu menu : menus){
+            RouterVo routerVo = new RouterVo();
+            //3.获取路径，首字母大写
+            routerVo.setName(getRouteName(menu));
+            //4.顶级目录需要加上/,普通菜单菜单不需要
+            routerVo.setPath(getRoutePath(menu));
+            /**
+             * 目录 M -> Layout
+             *   菜单 C -> 实际页面组件路径
+             */
+            //5.生成前端路由的component
+            routerVo.setComponent(getComponent(menu));
+            //6.设置一些其他值
+            routerVo.setHidden("1".equals(menu.getVisible()));
+            routerVo.setQuery(menu.getQuery());
+            routerVo.setMeta(
+                    new MetaVo(
+                            menu.getMenuName(),
+                            menu.getIcon(),
+                            Integer.valueOf(1).equals(menu.getIsCache())
+                    )
+            );
+            List<SysMenu> children = menu.getChildren();
+            if(children != null && !children.isEmpty() && "M".equals(menu.getMenuType())){
+                routerVo.setAlwaysShow(true);
+                routerVo.setRedirect("noRedirect");
+                routerVo.setChildren(buildMenus(children));
+            }
+            routerVoList.add(routerVo);
+        }
+        //7.返回列表
+        return routerVoList;
+    }
+
+    private String getComponent(SysMenu menu){
+        if("M".equals(menu.getMenuType())){
+            return "Layout";
+        }
+        return menu.getComponent();
+    }
+
+    private String getRoutePath(SysMenu menu){
+        if(menu.getParentId() != null &&  Long.valueOf(0L).equals(menu.getParentId())  && "M".equals(menu.getMenuType())){
+            return "/" + menu.getPath();
+        }
+        return menu.getPath();
+    }
+
+    private String getRouteName(SysMenu menu){
+        String path = menu.getPath();
+        if(!StringUtils.hasText(path)){
+            return "";
+        }
+        return path.substring(0,1).toUpperCase() + path.substring(1);
     }
 
     private boolean hasChildrenByMenuId(Long menuId){

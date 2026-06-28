@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,7 +16,7 @@ public class SysMenu {
     private Long menuId;
     private String menuName;
     private Long parentId;
-    private Integer menuOrder;
+    private Integer orderNum;
     private String path;
     private String component;
     private String query;
@@ -29,8 +29,8 @@ public class SysMenu {
     private String icon;
     private String createBy;
     private String updateBy;
-    private LocalDate createTime;
-    private LocalDate updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
     private String remark;
 
     @TableField(exist = false)

@@ -29,9 +29,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if(userByName.getStatus() != null && userByName.getStatus() == 1){
             throw  new BusinessException("用户已停用");
         }
-        List<String> permissions = sysMenuMapper.selectPermsByUserId(userByName.getUserId());
+        List<String> permissions;
+        // 管理员拥有所有权限
+        if(Long.valueOf(1L).equals(userByName.getUserId())){
+            permissions = sysMenuMapper.selectPermsAll();
+        } else {
+            permissions = sysMenuMapper.selectPermsByUserId(userByName.getUserId());
+        }
         LoginUser loginUser = new LoginUser();
-        loginUser.setName(userByName.getName());
+        loginUser.setName(userByName.getUserName());
         loginUser.setNickName(userByName.getNickName());
         loginUser.setPassword(userByName.getPassword());
         loginUser.setStatus(userByName.getStatus());

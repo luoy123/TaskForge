@@ -4,7 +4,6 @@ import com.zhq.taskforge.auth.dto.LoginRequest;
 import com.zhq.taskforge.auth.dto.LoginResponse;
 import com.zhq.taskforge.auth.service.AuthService;
 import com.zhq.taskforge.common.Result;
-import com.zhq.taskforge.common.ResultCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +17,19 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/auth")
-@Tag(name="认证登录模块")
+@Tag(name = "认证登录模块")
 public class AuthController {
 
     @Autowired
-    AuthService authService;
+    private AuthService authService;
 
+    /**
+     * 用户登录
+     */
     @PostMapping("/login")
     @Operation(summary = "用户登录")
-    public Result<LoginResponse> login(@RequestBody LoginRequest loginRequest){
+    public Result<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse loginResponse = authService.login(loginRequest);
-        return new Result<>(ResultCode.SUCCESS,loginResponse);
+        return Result.success(loginResponse);
     }
-
 }

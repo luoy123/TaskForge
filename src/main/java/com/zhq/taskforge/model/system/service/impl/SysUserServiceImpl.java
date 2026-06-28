@@ -13,6 +13,6 @@ public class SysUserServiceImpl
 
     @Override
     public SysUser getUserByName(String name) {
-        return this.lambdaQuery().eq(SysUser::getName,name).one();//返回一天数据
+        return this.lambdaQuery().eq(SysUser::getUserName,name).one();//返回一天数据
     }
 }

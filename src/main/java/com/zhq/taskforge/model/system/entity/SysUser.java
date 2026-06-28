@@ -16,13 +16,23 @@ public class SysUser {
     @TableId(type = IdType.AUTO)
     private Long userId;
 
-    private String name;
+    private Long deptId;
+
+    private String leaderId;
+
+    private String userName;
+
+    private String userWxName;
 
     private String nickName;
 
+    private String userType;
+
     private String email;
 
-    private String phone;
+    private String phonenumber;
+
+    private String sex;
 
     private String avatar;
 
@@ -31,13 +41,20 @@ public class SysUser {
     private Integer status;
 
     @TableLogic
-    private Integer deleted;
+    private Integer delFlag;
 
     private String loginIp;
 
+    private LocalDateTime loginDate;
+
+    private String createBy;
 
     private LocalDateTime createTime;
 
+    private String updateBy;
+
     private LocalDateTime updateTime;
+
+    private String remark;
 
 }

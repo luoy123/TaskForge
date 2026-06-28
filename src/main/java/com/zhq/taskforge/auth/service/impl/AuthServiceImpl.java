@@ -45,14 +45,14 @@ public class AuthServiceImpl implements  AuthService{
         }
 
         //6.正确，生成token
-        String token = JwtUtil.generateToken(sysUser.getUserId(), sysUser.getName());
+        String token = JwtUtil.generateToken(sysUser.getUserId(), sysUser.getUserName());
 
         //7.更新用户loginIP，loginTime等， todo:
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(token);
         loginResponse.setUserId(sysUser.getUserId());
         loginResponse.setNickName(sysUser.getNickName());
-        loginResponse.setUserName(sysUser.getName());
+        loginResponse.setUserName(sysUser.getUserName());
         return  loginResponse;
     }
 }

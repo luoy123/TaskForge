@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.model.system.mapper.SysDeptMapper">
+
+    <!-- 查询所有子部门 -->
+    <select id="selectChildrenDeptById" parameterType="Long" resultType="SysDept">
+        select *
+        from sys_dept
+        where find_in_set(#{deptId}, ancestors)
+    </select>
+
+    <!-- 批量更新子部门的祖级列表 -->
+    <update id="updateDeptChildren" parameterType="java.util.List">
+        update sys_dept set ancestors =
+        <foreach collection="depts" item="item" index="index"
+                 separator=" " open="case dept_id" close="end">
+            when #{item.deptId} then #{item.ancestors}
+        </foreach>
+        where dept_id in
+        <foreach collection="depts" item="item" index="index"
+                 separator="," open="(" close=")">
+            #{item.deptId}
+        </foreach>
+    </update>
+
+    <!-- 批量启用部门 -->
+    <update id="updateDeptStatusNormal" parameterType="Long">
+        update sys_dept set status = '0' where dept_id in
+        <foreach collection="array" item="deptId" open="(" separator="," close=")">
+            #{deptId}
+        </foreach>
+    </update>
+
+
+        <!-- 查询是否有子部门 -->
+        <select id="hasChildByDeptId" parameterType="Long" resultType="int">
+            select count(1)
+            from sys_dept
+            where del_flag = '0'
+              and parent_id = #{deptId}
+                limit 1
+        </select>
+
+        <!-- 查询部门下是否有用户 -->
+        <select id="checkDeptExistUser" parameterType="Long" resultType="int">
+            select count(1)
+            from sys_user
+            where dept_id = #{deptId}
+              and del_flag = '0'
+        </select>
+
+
+
+</mapper>

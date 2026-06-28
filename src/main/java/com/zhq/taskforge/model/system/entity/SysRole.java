@@ -20,7 +20,7 @@ public class SysRole {
     private Integer deptCheckStrictly;
     private String status;
     @TableLogic(value = "0",delval = "1")
-    private String deleted;
+    private String delFlag;
     private String createBy;
     private LocalDateTime createTime;
     private String updateBy;

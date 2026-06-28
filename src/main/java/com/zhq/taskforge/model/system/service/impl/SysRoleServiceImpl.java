@@ -59,8 +59,8 @@ public class SysRoleServiceImpl implements SysRoleService {
         if(role.getDeptCheckStrictly() == null){
             role.setDeptCheckStrictly(1);
         }
-        if(role.getDeleted() == null || role.getDeleted().isBlank()){
-            role.setDeleted("0");
+        if(role.getDelFlag() == null || role.getDelFlag().isBlank()){
+            role.setDelFlag("0");
         }
     }
 
@@ -171,7 +171,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     public List<SysRole> optionSelect() {
         LambdaQueryWrapper<SysRole> qw = new LambdaQueryWrapper<>();
         qw.eq(SysRole::getStatus,"0")
-                .eq(SysRole::getDeleted,"0")
+                .eq(SysRole::getDelFlag,"0")
                 .orderByAsc(SysRole::getRoleSort);
         return sysRoleMapper.selectList(qw);
     }
@@ -179,7 +179,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     @Override
     public Page<SysRole> list(Long PageNum, Long PageSizes, SysRole sysRole) {
         LambdaQueryWrapper<SysRole> qw = new LambdaQueryWrapper<>();
-        qw.eq(SysRole::getDeleted,"0");
+        qw.eq(SysRole::getDelFlag,"0");
         if(sysRole != null){
             /**
              * hasText:
@@ -208,7 +208,7 @@ public class SysRoleServiceImpl implements SysRoleService {
         SysRole sameNameRole = sysRoleMapper.selectOne(
                 new LambdaQueryWrapper<SysRole>()
                         .eq(SysRole::getRoleName, role.getRoleName())
-                        .eq(SysRole::getDeleted, 0)
+                        .eq(SysRole::getDelFlag, 0)
                         .last("limit 1")
         );
         if(sameNameRole != null && !sameNameRole.getRoleId().equals(roleId)){
@@ -218,7 +218,7 @@ public class SysRoleServiceImpl implements SysRoleService {
         SysRole sameKeyRole = sysRoleMapper.selectOne(
                 new LambdaQueryWrapper<SysRole>()
                         .eq(SysRole::getRoleKey, role.getRoleKey())
-                        .eq(SysRole::getDeleted, 0)
+                        .eq(SysRole::getDelFlag, 0)
                         .last("limit 1")
         );
         if(sameKeyRole != null && !sameKeyRole.getRoleId().equals(roleId)){

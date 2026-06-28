@@ -21,4 +21,17 @@ public class SecurityUtils {
         //返回兜底数据
         return authentication.getName();
     }
+
+    public  static Long getUserId(){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication == null ||  authentication.getPrincipal() == null){
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if(principal instanceof  LoginUser loginUser){
+            return loginUser.getUserId();
+        }
+        return null;
+    }
 }
