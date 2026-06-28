@@ -35,3 +35,5 @@ build/
 ### codex ###
 .codex-run/
 ROADMAP.md
+plan/
+AGENTS.md
