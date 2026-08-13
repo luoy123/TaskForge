@@ -1,0 +1,32 @@
+package com.zhq.taskforge.framework.security.handle;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zhq.taskforge.common.constant.HttpStatus;
+import com.zhq.taskforge.common.utils.ServletUtils;
+import com.zhq.taskforge.common.utils.StringUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@Component
+public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint, Serializable {
+    private static final long serialVersionUID = -8970718410437077606L;
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e)
+            throws IOException {
+        int code = HttpStatus.UNAUTHORIZED;
+        String msg = StringUtils.format("请求访问：{}，认证失败，无法访问系统资源", request.getRequestURI());
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("code", code);
+        result.put("message", msg);
+        ServletUtils.renderString(response, new ObjectMapper().writeValueAsString(result));
+    }
+}

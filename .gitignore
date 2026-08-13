@@ -37,3 +37,7 @@ build/
 ROADMAP.md
 plan/
 AGENTS.md
+
+### IDE / tool artifacts ###
+.specstory/
+.cursorindexingignore

@@ -1,0 +1,33 @@
+server:
+  port: 1234
+spring:
+  application:
+    name: taskforge
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 2004
+    url: jdbc:mysql://localhost:3306/laigeoffer-pmhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 10s
+    
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-not-delete-value: 0
+      logic-delete-value: 1
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.zhq.taskforge.common.core.domain.entity,com.zhq.taskforge.system.domain
+
+token:
+  header: Authorization
+  secret: my-very-long-and-random-secret-key-2026
+  expireTime: 30
