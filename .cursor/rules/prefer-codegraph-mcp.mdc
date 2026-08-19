@@ -1,0 +1,14 @@
+---
+description: Prefer CodeGraph MCP for call graphs and codebase navigation
+alwaysApply: true
+---
+
+# Prefer CodeGraph MCP
+
+When the task involves **callers/callees, impact analysis, route/handler chains, architecture navigation, or “who uses X”** in the current workspace:
+
+1. **Prefer the `codegraph` MCP** (configured in `~/.cursor/mcp.json`) over ad-hoc broad `Grep` / multi-file reads for relationship questions.
+2. Use `CallMcpTool` with the `codegraph` server and tools such as explore / callers / callees / impact / context (read the tool descriptor first if unsure of exact names).
+3. Ensure the project index exists (`.codegraph/`). If queries fail because the index is missing or stale, run `codegraph init` or `codegraph sync` in the repo root, then retry MCP.
+4. Fall back to `Grep` / `Read` only if CodeGraph MCP is unavailable or returns nothing useful; say briefly that MCP was unavailable when falling back.
+5. Do **not** use CodeGraph for database/table data — that belongs to the `dbx` MCP rule.

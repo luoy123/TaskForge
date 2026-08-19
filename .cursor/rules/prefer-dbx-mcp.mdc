@@ -1,0 +1,17 @@
+---
+description: Prefer DBX MCP over shell mysql/cli for all database work
+alwaysApply: true
+---
+
+# Prefer DBX MCP
+
+When inspecting or querying databases (MySQL, Redis, PostgreSQL, etc.):
+
+1. **Prefer the `dbx` MCP server** (`@dbx-app/mcp-server` in `~/.cursor/mcp.json`) over `Shell` + `mysql`/`redis-cli` or the old `mysql` MCP.
+2. Before calling, read the MCP tool descriptor if needed, then use `CallMcpTool` with the `dbx` server.
+3. Use connections already configured in the DBX desktop app (e.g. `local-mysql-taskforge`, `local-redis`). Manage allowlist and access mode in **DBX Settings → MCP** (`read_only` / `safe_write` / `high_risk_write`).
+4. Only fall back to terminal DB CLIs if DBX MCP is unavailable (not listed, errored, or timed out). Say briefly that MCP was unavailable when falling back.
+5. Do not put production secrets in chat; credentials live in DBX, not in chat or ad-hoc env dumps.
+6. Default assumption: treat DB access as **read-only** unless the user explicitly asks for writes and DBX MCP policy allows it.
+7. Do **not** use DBX MCP for code call-graph questions — that belongs to the `codegraph` MCP rule.
+8. If the needed connection is missing in DBX, tell the user to add it in DBX (do not invent connection strings in chat).
