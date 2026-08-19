@@ -71,11 +71,26 @@ public class PermissionConstants {
     public static final String CONFIG_REMOVE = "system:config:remove";
 
     /**
-     * 日志模块权限
+     * 操作日志权限
      */
-    public static final String LOG_LIST = "system:log:list";
-    public static final String LOG_QUERY = "system:log:query";
-    public static final String LOG_ADD = "system:log:add";
-    public static final String LOG_REMOVE = "system:log:remove";
+    public static final String OPERLOG_LIST = "monitor:operlog:list";
+    public static final String OPERLOG_QUERY = "monitor:operlog:query";
+    public static final String OPERLOG_REMOVE = "monitor:operlog:remove";
+
+    /**
+     * 登录日志权限
+     */
+    public static final String LOGININFOR_LIST = "monitor:logininfor:list";
+    public static final String LOGININFOR_QUERY = "monitor:logininfor:query";
+    public static final String LOGININFOR_REMOVE = "monitor:logininfor:remove";
+
+    /**
+     * 公共模块
+     */
+    public static final String NOTICE_LIST = "system:notice:list";
+    public static final String NOTICE_QUERY = "system:notice:query";
+    public static final String NOTICE_ADD = "system:notice:add";
+    public static final String NOTICE_EDIT = "system:notice:edit";
+    public static final String NOTICE_REMOVE = "system:notice:remove";
 
 }

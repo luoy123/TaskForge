@@ -2,8 +2,10 @@ package com.zhq.taskforge.web.controller.system;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhq.taskforge.common.core.domain.R;
+import com.zhq.taskforge.common.annotation.Log;
 import com.zhq.taskforge.common.constants.PermissionConstants;
 import com.zhq.taskforge.common.core.domain.entity.SysRole;
+import com.zhq.taskforge.common.enums.BusinessType;
 import com.zhq.taskforge.common.utils.SecurityUtils;
 import com.zhq.taskforge.system.service.ISysRoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +26,7 @@ public class SysRoleController {
 
     @PostMapping()
     @Operation(summary = "添加角色")
+    @Log(title = "角色管理", businessType = BusinessType.INSERT)
     @PreAuthorize("hasAnyAuthority('" + PermissionConstants.ROLE_ADD + "')")
     public R<Void> add(@RequestBody SysRole sysRole) {
         sysRole.setCreateBy(SecurityUtils.getUsername());
@@ -33,6 +36,7 @@ public class SysRoleController {
 
     @PutMapping()
     @Operation(summary = "修改角色")
+    @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PreAuthorize("hasAnyAuthority('" + PermissionConstants.ROLE_EDIT + "')")
     public R<Void> updateRole(@RequestBody SysRole sysRole) {
         sysRole.setUpdateBy(SecurityUtils.getUsername());
@@ -42,6 +46,7 @@ public class SysRoleController {
 
     @DeleteMapping("/{roleIds}")
     @Operation(summary = "删除角色")
+    @Log(title = "角色管理", businessType = BusinessType.DELETE)
     @PreAuthorize("hasAnyAuthority('" + PermissionConstants.ROLE_REMOVE + "')")
     public R<Void> remove(@PathVariable List<Long> roleIds) {
         sysRoleService.deleteRole(roleIds);
@@ -50,6 +55,7 @@ public class SysRoleController {
 
     @PutMapping("/changeStatus")
     @Operation(summary = "修改角色状态")
+    @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PreAuthorize("hasAnyAuthority('" + PermissionConstants.ROLE_EDIT + "')")
     public R<Void> changeStatus(@RequestBody SysRole sysRole) {
         sysRole.setUpdateBy(SecurityUtils.getUsername());

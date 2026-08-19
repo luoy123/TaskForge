@@ -1,14 +1,13 @@
 package com.zhq.taskforge.system.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhq.taskforge.system.domain.SysOperLog;
-
-import java.util.List;
 
 public interface ISysOperLogService {
 
     public void insertOperlog(SysOperLog operLog);
 
-    public List<SysOperLog> selectOperLogList(SysOperLog operLog);
+    public Page<SysOperLog> selectOperLogList(Long pageNum, Long pageSize, SysOperLog operLog);
 
     public int deleteOperLogByIds(Long[] operIds);
 

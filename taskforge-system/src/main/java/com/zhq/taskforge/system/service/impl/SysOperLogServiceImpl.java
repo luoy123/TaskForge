@@ -1,12 +1,11 @@
 package com.zhq.taskforge.system.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhq.taskforge.system.domain.SysOperLog;
 import com.zhq.taskforge.system.mapper.SysOperLogMapper;
 import com.zhq.taskforge.system.service.ISysOperLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class SysOperLogServiceImpl implements ISysOperLogService {
@@ -19,8 +18,9 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
     }
 
     @Override
-    public List<SysOperLog> selectOperLogList(SysOperLog operLog) {
-        return operLogMapper.selectOperLogList(operLog);
+    public Page<SysOperLog> selectOperLogList(Long pageNum, Long pageSize, SysOperLog operLog) {
+        Page<SysOperLog> page = new Page<>(pageNum, pageSize);
+        return (Page<SysOperLog>) operLogMapper.selectOperLogList(page, operLog);
     }
 
     @Override

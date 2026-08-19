@@ -23,7 +23,7 @@ public interface ISysUserService extends IService<SysUser> {
     public boolean checkUserAllowed(SysUser user);
 
     // 写操作
-    public void insetUser(SysUser user);
+    public void insertUser(SysUser user);
 
     public SysUser updateUser(SysUser user);
 
@@ -32,5 +32,16 @@ public interface ISysUserService extends IService<SysUser> {
     public SysUser updateUserStatus(SysUser user);
 
     public void resetPwd(SysUser user);
+
+    public boolean checkEmailUnique(SysUser user);
+
+    public int updateProfile(SysUser sysUser);
+
+    /**
+     * 个人中心修改密码（不走超管校验）。
+     *
+     * @return 加密后的新密码哈希，供 Controller 更新 Redis 缓存
+     */
+    public String updateUserPassword(Long userId, String oldPassword, String newPassword);
 
 }
