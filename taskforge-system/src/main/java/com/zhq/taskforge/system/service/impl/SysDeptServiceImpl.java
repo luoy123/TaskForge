@@ -1,20 +1,24 @@
 package com.zhq.taskforge.system.service.impl;
 
-import cn.hutool.core.convert.Convert;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.zhq.taskforge.common.constants.UserConstants;
-import com.zhq.taskforge.common.exception.ServiceException;
-import com.zhq.taskforge.common.core.domain.entity.SysDept;
-import com.zhq.taskforge.system.mapper.SysDeptMapper;
-import com.zhq.taskforge.system.service.ISysDeptService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zhq.taskforge.common.annotation.DataScope;
+import com.zhq.taskforge.common.constants.UserConstants;
+import com.zhq.taskforge.common.core.domain.entity.SysDept;
+import com.zhq.taskforge.common.datascope.DataScopeContext;
+import com.zhq.taskforge.common.exception.ServiceException;
+import com.zhq.taskforge.common.utils.StringUtils;
+import com.zhq.taskforge.system.mapper.SysDeptMapper;
+import com.zhq.taskforge.system.service.ISysDeptService;
+
+import cn.hutool.core.convert.Convert;
 
 @Service
 public class SysDeptServiceImpl implements ISysDeptService {
@@ -23,8 +27,13 @@ public class SysDeptServiceImpl implements ISysDeptService {
     private SysDeptMapper sysDeptMapper;
 
     @Override
+    @DataScope(deptAlias="",userAlias="",permission="system:dept:list")
     public List<SysDept> selectDeptList(SysDept dept) {
         LambdaQueryWrapper<SysDept> qw = new LambdaQueryWrapper<>();
+        String scope = DataScopeContext.get();
+        if(StringUtils.isNotEmpty(scope)){
+            qw.apply(scope);
+        }
         qw.eq(SysDept::getDelFlag, 0)
                 .orderByAsc(SysDept::getOrderNum);
         if (!StringUtils.isEmpty(dept.getDeptName())) {

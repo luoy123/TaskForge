@@ -31,15 +31,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
         SysUser userByName = sysUserService.getUserByName(name);
-
-        // 1.查角色列表
-        List<SysRole> selectRolesByUserId = sysRoleService.selectRolesByUserId(userByName.getUserId());
-
-        // 2.给每个角色装填permissions
-        for (SysRole role : selectRolesByUserId) {
-            List<String> permissions = sysMenuMapper.selectMenuPermsByRoleId(role.getRoleId());
-        }
-
         if (userByName == null) {
             throw new UsernameNotFoundException("用户不存在");
         }
@@ -47,7 +38,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new ServiceException("用户已停用");
         }
 
-        // 3. 该用户的所有菜单权限
+        // 1.查角色列表并给每个角色装填 permissions
+        List<SysRole> roles = sysRoleService.selectRolesByUserId(userByName.getUserId());
+        for (SysRole role : roles) {
+            List<String> rolePerms = sysMenuMapper.selectMenuPermsByRoleId(role.getRoleId());
+            role.setPermissions(rolePerms == null ? new HashSet<>() : new HashSet<>(rolePerms));
+        }
+        userByName.setRoles(roles);
+
+        // 2.该用户的所有菜单权限（并集）
         List<String> permissions;
         if (Long.valueOf(1L).equals(userByName.getUserId())) {
             permissions = sysMenuMapper.selectPermsAll();
@@ -58,8 +57,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         loginUser.setUserId(userByName.getUserId());
         loginUser.setUser(userByName);
         loginUser.setDeptId(userByName.getDeptId());
-        Set<String> permissionSet = new HashSet<>(permissions);
-        loginUser.setPermissions(permissionSet);
+        loginUser.setPermissions(new HashSet<>(permissions == null ? List.of() : permissions));
         return loginUser;
     }
 

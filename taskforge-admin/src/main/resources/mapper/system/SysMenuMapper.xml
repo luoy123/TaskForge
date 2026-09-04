@@ -49,6 +49,15 @@
     and perms != '';
     </select>
 
+    <select id="selectMenuPermsByRoleId" resultType="String">
+    select sm.perms from sys_role_menu srm
+    inner join sys_menu sm on sm.menu_id = srm.menu_id
+    where srm.role_id = #{roleId}
+    and sm.status = 0
+    and sm.perms is not null
+    and sm.perms != '';
+    </select>
+
     <select id="selectMenuTreeByUserId" resultMap="sysMenuMap">
         select distinct
             m.menu_id,

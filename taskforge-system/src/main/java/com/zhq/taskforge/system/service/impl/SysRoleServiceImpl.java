@@ -1,25 +1,28 @@
 package com.zhq.taskforge.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zhq.taskforge.common.exception.ServiceException;
-import com.zhq.taskforge.common.core.domain.entity.SysRole;
-import com.zhq.taskforge.system.domain.SysRoleMenu;
-import com.zhq.taskforge.system.domain.SysUserRole;
-import com.zhq.taskforge.system.mapper.SysRoleMapper;
-import com.zhq.taskforge.system.mapper.SysRoleMenuMapper;
-import com.zhq.taskforge.system.mapper.SysUserRoleMapper;
-import com.zhq.taskforge.system.service.ISysRoleService;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.zhq.taskforge.common.core.domain.entity.SysRole;
+import com.zhq.taskforge.common.exception.ServiceException;
+import com.zhq.taskforge.system.domain.SysRoleDept;
+import com.zhq.taskforge.system.domain.SysRoleMenu;
+import com.zhq.taskforge.system.domain.SysUserRole;
+import com.zhq.taskforge.system.mapper.SysRoleDeptMapper;
+import com.zhq.taskforge.system.mapper.SysRoleMapper;
+import com.zhq.taskforge.system.mapper.SysRoleMenuMapper;
+import com.zhq.taskforge.system.mapper.SysUserRoleMapper;
+import com.zhq.taskforge.system.service.ISysRoleService;
 
 @Service
 @Transactional
@@ -31,7 +34,8 @@ public class SysRoleServiceImpl implements ISysRoleService {
     SysRoleMenuMapper sysRoleMenuMapper;
     @Autowired
     SysUserRoleMapper sysUserRoleMapper;
-
+    @Autowired
+    SysRoleDeptMapper sysRoleDeptMapper;
     @Override
     public void addRole(SysRole role) {
 
@@ -119,7 +123,13 @@ public class SysRoleServiceImpl implements ISysRoleService {
         List<Long> collect = sysRoleMenus.stream()
                 .map(SysRoleMenu::getMenuId)
                 .collect(Collectors.toList());
+        
+                //已勾选的部门
+        List<SysRoleDept> list =  sysRoleDeptMapper.selectList(new LambdaQueryWrapper<SysRoleDept>()
+                                    .eq(SysRoleDept::getRoleId,roleId));
+        List<Long> deptIdList = list.stream().map(SysRoleDept::getDeptId).collect(Collectors.toList());
         sysRole.setMenuIds(collect);
+        sysRole.setDeptIds(deptIdList);
         return sysRole;
     }
 
@@ -140,6 +150,8 @@ public class SysRoleServiceImpl implements ISysRoleService {
 
         sysRoleMenuMapper.delete(Wrappers.<SysRoleMenu>lambdaQuery()
                 .in(SysRoleMenu::getRoleId, roleIds));
+        sysRoleDeptMapper.delete(new LambdaQueryWrapper<SysRoleDept>()
+                .in(SysRoleDept::getRoleId, roleIds));
         sysRoleMapper.delete(Wrappers.<SysRole>lambdaQuery()
                 .in(SysRole::getRoleId, roleIds));
     }
@@ -200,6 +212,40 @@ public class SysRoleServiceImpl implements ISysRoleService {
             throw new ServiceException("userId不能为空");
         }
         return sysRoleMapper.selectRolesByUserId(userId);
+    }
+
+    @Override
+    public void authDataScope(SysRole role) {
+        if (role.getRoleId() == null) {
+            throw new ServiceException("roleId不能为空");
+        }
+        if (Long.valueOf(1L).equals(role.getRoleId())) {
+            throw new ServiceException("无法修改超级管理员的数据范围");
+        }
+
+        // 1. 只更新 data_scope，不要整角色 update
+        SysRole update = new SysRole();
+        update.setRoleId(role.getRoleId());
+        update.setDataScope(role.getDataScope());
+        update.setUpdateBy(role.getUpdateBy());
+        update.setUpdateTime(LocalDateTime.now());
+        sysRoleMapper.updateById(update);
+
+        // 2. 先清空旧关联
+        sysRoleDeptMapper.delete(new LambdaQueryWrapper<SysRoleDept>()
+                .eq(SysRoleDept::getRoleId, role.getRoleId()));
+
+        // 3. data_scope=2 且带了 deptIds → 重新插入
+        if ("2".equals(role.getDataScope())
+                && role.getDeptIds() != null
+                && !role.getDeptIds().isEmpty()) {
+            for (Long deptId : role.getDeptIds()) {
+                SysRoleDept rd = new SysRoleDept();
+                rd.setDeptId(deptId);
+                rd.setRoleId(role.getRoleId());
+                sysRoleDeptMapper.insert(rd);
+            }
+        }
     }
 
 }

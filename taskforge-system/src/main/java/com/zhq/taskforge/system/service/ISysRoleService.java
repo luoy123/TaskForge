@@ -1,9 +1,9 @@
 package com.zhq.taskforge.system.service;
 
+import java.util.List;
+
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhq.taskforge.common.core.domain.entity.SysRole;
-
-import java.util.List;
 
 public interface ISysRoleService {
     void addRole(SysRole role);
@@ -21,5 +21,7 @@ public interface ISysRoleService {
     Page<SysRole> list(Long PageNum, Long PageSizes, SysRole sysRole);
 
     List<SysRole> selectRolesByUserId(Long userId);
+
+    void authDataScope(SysRole role);
 
 }

@@ -1,12 +1,16 @@
-package com.zhq.taskforge.framework.datascope;
+package com.zhq.taskforge.common.datascope;
 
 /**
  * 存放本次请求中 DataScopeAspect 拼好的过滤条件。
  * 用 ThreadLocal：每个请求线程各有一份，互不干扰。
+ * 放在 common，供 system（Service）和 framework（Aspect）共同使用。
  */
-public class DataScopeContext {
+public final class DataScopeContext {
 
     private static final ThreadLocal<String> CONTEXT = new ThreadLocal<>();
+
+    private DataScopeContext() {
+    }
 
     public static void set(String sql) {
         CONTEXT.set(sql);

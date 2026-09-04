@@ -6,23 +6,30 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhq.taskforge.common.annotation.DataScope;
 import com.zhq.taskforge.common.core.domain.entity.SysUser;
+import com.zhq.taskforge.common.datascope.DataScopeContext;
 import com.zhq.taskforge.common.exception.ServiceException;
 import com.zhq.taskforge.common.utils.SecurityUtils;
+import com.zhq.taskforge.common.utils.StringUtils;
 import com.zhq.taskforge.system.domain.SysUserRole;
 import com.zhq.taskforge.system.mapper.SysUserMapper;
 import com.zhq.taskforge.system.mapper.SysUserRoleMapper;
 import com.zhq.taskforge.system.service.ISysUserService;
 
+
 @Service
 public class SysUserServiceImpl
         extends ServiceImpl<SysUserMapper, SysUser>
         implements ISysUserService {
+
+    private final SysConfigServiceImpl sysConfigServiceImpl;
+
+    private final SysRoleServiceImpl sysRoleServiceImpl;
 
     @Autowired
     SysUserMapper sysUserMapper;
@@ -30,19 +37,29 @@ public class SysUserServiceImpl
     @Autowired
     SysUserRoleMapper sysUserRoleMapper;
 
+    SysUserServiceImpl(SysRoleServiceImpl sysRoleServiceImpl, SysConfigServiceImpl sysConfigServiceImpl) {
+        this.sysRoleServiceImpl = sysRoleServiceImpl;
+        this.sysConfigServiceImpl = sysConfigServiceImpl;
+    }
+
     @Override
     public SysUser getUserByName(String name) {
         return this.lambdaQuery().eq(SysUser::getUserName, name).one();
     }
 
     @Override
+    @DataScope(deptAlias = "",userAlias ="",permission = "system:user:list")
     public Page<SysUser> selectUserPage(Long PageNum, Long PageSizes, SysUser sysUser) {
         Page<SysUser> page = new Page<>(PageNum, PageSizes);
         LambdaQueryWrapper<SysUser> qw = new LambdaQueryWrapper<>();
+        String scope = DataScopeContext.get();
+        if(StringUtils.isNotEmpty(scope)){
+            qw.apply(scope);
+        }
 
         if (sysUser != null) {
             // 根据用户名查询
-            if (StringUtils.hasText(sysUser.getUserName())) {
+            if (StringUtils.isNotEmpty(sysUser.getUserName())) {
                 qw.like(SysUser::getUserName, sysUser.getUserName());
             }
             // 根据状态查询
@@ -73,7 +90,7 @@ public class SysUserServiceImpl
 
     @Override
     public boolean checkPhoneUnique(SysUser user) {
-        if (!StringUtils.hasText(user.getPhonenumber())) {
+        if (!StringUtils.isNotEmpty(user.getPhonenumber())) {
             return true;
         }
         LambdaQueryWrapper<SysUser> qw = new LambdaQueryWrapper<SysUser>()
@@ -192,7 +209,7 @@ public class SysUserServiceImpl
 
     @Override
     public boolean checkEmailUnique(SysUser user) {
-        if (!StringUtils.hasText(user.getEmail())) {
+        if (!StringUtils.isNotEmpty(user.getEmail())) {
             return true;
         }
         LambdaQueryWrapper<SysUser> qw = new LambdaQueryWrapper<SysUser>()
@@ -208,16 +225,16 @@ public class SysUserServiceImpl
         // 只拼允许改的字段；空串/null 不写库，避免 Swagger 只改手机号时把邮箱等刷空
         SysUser update = new SysUser();
         update.setUserId(sysUser.getUserId());
-        if (StringUtils.hasText(sysUser.getNickName())) {
+        if (StringUtils.isNotEmpty(sysUser.getNickName())) {
             update.setNickName(sysUser.getNickName());
         }
-        if (StringUtils.hasText(sysUser.getEmail())) {
+        if (StringUtils.isNotEmpty(sysUser.getEmail())) {
             update.setEmail(sysUser.getEmail());
         }
-        if (StringUtils.hasText(sysUser.getPhonenumber())) {
+        if (StringUtils.isNotEmpty(sysUser.getPhonenumber())) {
             update.setPhonenumber(sysUser.getPhonenumber());
         }
-        if (StringUtils.hasText(sysUser.getSex())) {
+        if (StringUtils.isNotEmpty(sysUser.getSex())) {
             update.setSex(sysUser.getSex());
         }
         update.setUpdateTime(LocalDateTime.now());
@@ -229,7 +246,7 @@ public class SysUserServiceImpl
         if (userId == null) {
             throw new ServiceException("用户未登录");
         }
-        if (!StringUtils.hasText(oldPassword) || !StringUtils.hasText(newPassword)) {
+        if (!StringUtils.isNotEmpty(oldPassword) || !StringUtils.isNotEmpty(newPassword)) {
             throw new ServiceException("旧密码和新密码不能为空");
         }
 
