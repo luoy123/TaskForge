@@ -22,6 +22,7 @@
         <module>taskforge-common</module>
         <module>taskforge-framework</module>
         <module>taskforge-system</module>
+        <module>taskforge-project</module>
         <module>taskforge-admin</module>
     </modules>
 
@@ -69,6 +70,11 @@
             <dependency>
                 <groupId>com.zhq</groupId>
                 <artifactId>taskforge-system</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zhq</groupId>
+                <artifactId>taskforge-project</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.project.mapper.ProjectMapper">
+
+    <!-- 详情：表字段已对齐；你只需保证 Service 层补齐 statusName / collected / 私有校验 -->
+    <select id="detail" resultType="com.zhq.taskforge.project.domain.vo.ProjectResVO">
+        select p.close_begin_time,
+               p.close_end_time,
+               p.id as projectId,
+               p.project_code,
+               p.project_name,
+               p.user_id,
+               su.nick_name,
+               ps.stage_code,
+               ps.stage_name,
+               p.type as projectType,
+               p.status,
+               p.published,
+               p.project_process,
+               p.created_time,
+               p.updated_time,
+               p.description,
+               p.cover,
+               p.auto_update_process,
+               p.open_prefix,
+               p.prefix,
+               p.open_task_private,
+               p.msg_notify,
+               p.notify_day
+        from pmhub_project p
+                 left join pmhub_project_stage ps on p.project_stage_id = ps.id
+                 left join sys_user su on su.user_id = p.user_id
+        where p.id = #{projectId}
+          and p.deleted = 0
+    </select>
+
+
+    <select id="selectMyProjectList" resultType="com.zhq.taskforge.project.domain.vo.ProjectResVO">
+        select p.close_begin_time, p.close_end_time,
+        p.id as projectId, p.project_code, p.project_name, p.user_id,
+        su.nick_name,
+        ps.stage_code, ps.stage_name,
+        p.type as projectType, p.status, p.published, p.project_process,
+        p.created_time, p.updated_time, p.description, p.cover,
+        p.auto_update_process, p.open_prefix, p.prefix,
+        p.open_task_private, p.msg_notify, p.notify_day
+        from pmhub_project p
+        left join pmhub_project_stage ps on p.project_stage_id = ps.id
+        left join pmhub_project_member pm on p.id = pm.pt_id
+        left join sys_user su on su.user_id = p.user_id
+        where pm.user_id = #{userId}
+              and pm.type = 'project'
+              and p.deleted = 0
+        <if test="req.keyword != null and req.keyword != ''">
+            and (p.project_code like concat('%', #{req.keyword}, '%')
+            or p.project_name like concat('%', #{req.keyword}, '%'))
+        </if>
+        <if test="req.stageCode != null and req.stageCode != ''">
+            and ps.stage_code = #{req.stageCode}
+        </if>
+        <if test="req.status != null and req.status != ''">
+            and p.status = #{req.status}
+        </if>
+        <if test="req.published != null and req.published != ''">
+            and p.published = #{req.published}
+        </if>
+        <if test="req.projectType != null and req.projectType != ''">
+            and p.type = #{req.projectType}
+        </if>
+        order by p.created_time desc
+    </select>
+
+    <update id="softDelete">
+        update pmhub_project
+        set deleted      = 1,
+            deleted_time = #{deletedTime},
+            updated_by   = #{updatedBy},
+            updated_time = #{updatedTime}
+        where id = #{id}
+          and deleted = 0
+    </update>
+
+</mapper>

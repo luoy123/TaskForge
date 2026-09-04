@@ -92,5 +92,20 @@ public class PermissionConstants {
     public static final String NOTICE_ADD = "system:notice:add";
     public static final String NOTICE_EDIT = "system:notice:edit";
     public static final String NOTICE_REMOVE = "system:notice:remove";
-
+    
+    /**
+     * 项目模块
+     */
+    public static final String PROJECT_LIST = "project:manage:list";
+    public static final String PROJECT_QUERY = "project:manage:query";
+    public static final String PROJECT_DETAIL = "project:manage:detail";
+    public static final String PROJECT_ADD = "project:manage:add";
+    public static final String PROJECT_EDIT = "project:manage:edit";
+    /** 与菜单 perms 对齐：project:manage:delete */
+    public static final String PROJECT_REMOVE = "project:manage:delete";
+    public static final String PROJECT_ARCHIVE = "project:manage:archive";
+    public static final String PROJECT_CANCEL_ARCHIVE = "project:manage:cancelArchive";
+    public static final String PROJECT_QUIT = "project:manage:quit";
+    public static final String PROJECT_COLLECT = "project:manage:collect";
+    public static final String PROJECT_CANCEL_COLLECT = "project:manage:cancelCollect";
 }
