@@ -42,3 +42,6 @@ AGENTS.md
 .specstory/
 .cursorindexingignore
 .codegraph/
+
+### log ###
+logs/
