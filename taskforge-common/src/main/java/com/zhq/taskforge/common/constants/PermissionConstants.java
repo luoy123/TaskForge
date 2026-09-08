@@ -108,4 +108,25 @@ public class PermissionConstants {
     public static final String PROJECT_QUIT = "project:manage:quit";
     public static final String PROJECT_COLLECT = "project:manage:collect";
     public static final String PROJECT_CANCEL_COLLECT = "project:manage:cancelCollect";
+
+    /**
+     * 任务模块（对齐 sys_menu perms）
+     */
+    public static final String PROJECT_TASK_ADD = "project:task:add";
+    public static final String PROJECT_TASK_DETAIL = "project:task:detail";
+    public static final String PROJECT_TASK_LIST = "project:task:list";
+    public static final String PROJECT_TASK_EDIT = "project:task:edit";
+    public static final String PROJECT_TASK_DELETE = "project:task:delete";
+    public static final String PROJECT_TASK_ADD_CHILD = "project:task:addChildTask";
+    public static final String PROJECT_TASK_ADD_COMMENT = "project:task:addComment";
+    public static final String PROJECT_TASK_LOG_LIST = "project:task:logList";
+    public static final String PROJECT_TASK_IMPORT = "project:task:import";
+
+    /**
+     * 项目文件（对齐 sys_menu perms）
+     */
+    public static final String PROJECT_FILE_UPLOAD = "project:file:upload";
+    public static final String PROJECT_FILE_LIST = "project:file:queryFileList";
+    public static final String PROJECT_FILE_RENAME = "project:file:rename";
+    public static final String PROJECT_FILE_DELETE = "project:file:delete";
 }

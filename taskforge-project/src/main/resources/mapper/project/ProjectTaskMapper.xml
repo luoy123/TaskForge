@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.project.mapper.ProjectTaskMapper">
+
+    <select id="detail" resultType="com.zhq.taskforge.project.domain.vo.task.TaskResVO">
+        select t.id as taskId,
+               t.project_id,
+               t.task_name,
+               t.description,
+               t.user_id,
+               su.nick_name,
+               t.project_stage_id,
+               ps.stage_name,
+               t.task_priority,
+               t.status,
+               t.execute_status,
+               t.task_process,
+               t.task_pid,
+               t.begin_time,
+               t.end_time,
+               t.close_time,
+               t.created_time
+        from pmhub_project_task t
+                 left join sys_user su on su.user_id = t.user_id
+                 left join pmhub_project_stage ps on ps.id = t.project_stage_id
+        where t.id = #{taskId}
+          and t.deleted = 0
+    </select>
+
+    <update id="softDelete">
+        update pmhub_project_task
+        set deleted      = 1,
+            deleted_time = #{deletedTime},
+            updated_by   = #{updatedBy},
+            updated_time = #{updatedTime}
+        where id = #{id}
+          and deleted = 0
+    </update>
+
+    <select id="selectTaskList" resultType="com.zhq.taskforge.project.domain.vo.task.TaskResVO">
+        select t.id as taskId, t.project_id, t.task_name, t.description,
+        t.user_id, su.nick_name, t.project_stage_id, ps.stage_name,
+        t.task_priority, t.status, t.execute_status, t.task_process,
+        t.task_pid, t.begin_time, t.end_time, t.close_time, t.created_time
+        from pmhub_project_task t
+        left join sys_user su on su.user_id = t.user_id
+        left join pmhub_project_stage ps on ps.id = t.project_stage_id
+        where t.deleted = 0
+        and t.project_id = #{data.projectId}
+        <if test="data.taskName != null and data.taskName != ''">
+            and t.task_name like concat('%',#{data.taskName},'%')
+        </if>
+        <if test="data.status != null">
+            and t.status = #{data.status}
+        </if>
+        order by t.created_time desc
+    </select>
+
+    <select id="queryChildTask" resultType="com.zhq.taskforge.project.domain.vo.task.TaskResVO">
+        select t.id as taskId,
+               t.project_id,
+               t.task_name,
+               t.description,
+               t.user_id,
+               su.nick_name,
+               t.project_stage_id,
+               ps.stage_name,
+               t.task_priority,
+               t.status,
+               t.execute_status,
+               t.task_process,
+               t.task_pid,
+               t.begin_time,
+               t.end_time,
+               t.close_time,
+               t.created_time
+        from pmhub_project_task t
+                 left join sys_user su on su.user_id = t.user_id
+                 left join pmhub_project_stage ps on ps.id = t.project_stage_id
+        where t.task_pid = #{taskId}
+          and t.deleted = 0
+        order by t.created_time desc
+    </select>
+
+    <!-- G4 导出 -->
+    <select id="export" resultType="com.zhq.taskforge.project.domain.vo.task.TaskExportVO">
+        select pt.task_name,
+               p.project_name,
+               ps.stage_name,
+               su.nick_name as executor,
+               pt.status,
+               pt.execute_status,
+               pt.task_priority,
+               pt.created_by,
+               pt.created_time
+        from pmhub_project_task pt
+                 left join pmhub_project p on p.id = pt.project_id
+                 left join pmhub_project_stage ps on pt.project_stage_id = ps.id
+                 left join sys_user su on su.user_id = pt.user_id
+        where pt.deleted = 0
+        <if test="taskIdList != null and taskIdList.size() > 0">
+            and pt.id in
+            <foreach collection="taskIdList" item="taskId" open="(" separator="," close=")">
+                #{taskId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="exportAll" resultType="com.zhq.taskforge.project.domain.vo.task.TaskExportVO">
+        select pt.task_name,
+               p.project_name,
+               ps.stage_name,
+               su.nick_name as executor,
+               pt.status,
+               pt.execute_status,
+               pt.task_priority,
+               pt.created_by,
+               pt.created_time
+        from pmhub_project_task pt
+                 left join pmhub_project_member pm on pt.id = pm.pt_id and pm.type = 'task'
+                 left join pmhub_project p on p.id = pt.project_id
+                 left join pmhub_project_stage ps on pt.project_stage_id = ps.id
+                 left join sys_user su on su.user_id = pt.user_id
+        where pt.deleted = 0
+          and pm.user_id = #{userId}
+    </select>
+
+    <select id="selectUserIdByUsername" resultType="java.lang.Long">
+        select user_id
+        from sys_user
+        where user_name = #{username}
+          and del_flag = '0'
+        limit 1
+    </select>
+</mapper>

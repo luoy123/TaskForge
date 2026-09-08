@@ -32,3 +32,7 @@ token:
   header: Authorization
   secret: my-very-long-and-random-secret-key-2026
   expireTime: 30
+
+# 文件上传根目录
+taskforge:
+  profile: /home/zxb/data/taskforge/uploadPath

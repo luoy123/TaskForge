@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.project.mapper.ProjectFileMapper">
+
+    <update id="softDelete">
+        update pmhub_project_file
+        set deleted      = 1,
+            deleted_time = #{deletedTime},
+            updated_by   = #{updatedBy},
+            updated_time = #{updatedTime}
+        where id = #{id}
+          and deleted = 0
+    </update>
+
+    <!--
+      列表筛选（对照 pmhub，简化）：
+      - type 为空：project_id = id，且 type in ('project','task')
+      - type = project|task|template：pt_id = id 且 type = 该值
+      - 只查 deleted = 0
+    -->
+    <select id="queryFileList" resultType="com.zhq.taskforge.project.domain.vo.file.ProjectFileResVO">
+        select f.id as fileId,
+               f.project_id,
+               f.pt_id,
+               f.type,
+               f.file_name,
+               f.extension,
+               f.file_url,
+               f.path_name,
+               f.file_size,
+               f.user_id,
+               su.nick_name,
+               f.created_time
+        from pmhub_project_file f
+                 left join sys_user su on su.user_id = f.user_id
+        where f.deleted = 0
+        <choose>
+            <when test="data.type != null and data.type != ''">
+                and f.pt_id = #{data.id}
+                and f.type = #{data.type}
+            </when>
+            <otherwise>
+                and f.project_id = #{data.id}
+                and f.type in ('project', 'task')
+            </otherwise>
+        </choose>
+        <if test="data.fileName != null and data.fileName != ''">
+            and f.file_name like concat('%', #{data.fileName}, '%')
+        </if>
+        order by f.created_time desc
+    </select>
+
+</mapper>

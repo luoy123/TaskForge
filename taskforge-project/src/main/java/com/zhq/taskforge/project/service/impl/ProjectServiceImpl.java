@@ -21,6 +21,7 @@ import com.zhq.taskforge.project.domain.ProjectCollection;
 import com.zhq.taskforge.project.domain.ProjectLog;
 import com.zhq.taskforge.project.domain.ProjectMember;
 import com.zhq.taskforge.project.domain.ProjectStage;
+import com.zhq.taskforge.project.domain.ProjectTask;
 import com.zhq.taskforge.project.domain.vo.ProjectReqVO;
 import com.zhq.taskforge.project.domain.vo.ProjectResVO;
 import com.zhq.taskforge.project.mapper.ProjectCollectionMapper;
@@ -28,6 +29,7 @@ import com.zhq.taskforge.project.mapper.ProjectLogMapper;
 import com.zhq.taskforge.project.mapper.ProjectMapper;
 import com.zhq.taskforge.project.mapper.ProjectMemberMapper;
 import com.zhq.taskforge.project.mapper.ProjectStageMapper;
+import com.zhq.taskforge.project.mapper.ProjectTaskMapper;
 import com.zhq.taskforge.project.service.IProjectService;
 
 import cn.hutool.core.util.IdUtil;
@@ -45,6 +47,8 @@ public class ProjectServiceImpl implements IProjectService {
     private ProjectLogMapper projectLogMapper;
     @Autowired
     private ProjectCollectionMapper projectCollectionMapper;
+    @Autowired
+    private ProjectTaskMapper projectTaskMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -235,7 +239,12 @@ public class ProjectServiceImpl implements IProjectService {
             throw new ServiceException("项目不存在");
         }
 
-        // TODO: 接入任务模块后，有任务则禁止删除
+        // 有未删任务则禁止删除
+        LambdaQueryWrapper<ProjectTask> taskQw = new LambdaQueryWrapper<>();
+        taskQw.eq(ProjectTask::getProjectId, projectId).eq(ProjectTask::getDeleted, 0);
+        if (projectTaskMapper.selectCount(taskQw) > 0) {
+            throw new ServiceException("项目下有任务，无法删除");
+        }
 
         LocalDateTime now = LocalDateTime.now();
         int rows = projectMapper.softDelete(projectId, now, SecurityUtils.getUsername(), now);
