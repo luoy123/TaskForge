@@ -26,10 +26,15 @@ export const usePermissionStore = defineStore('permission', () => {
   async function generateRoutes() {
     // ========== 【学员填写 R1】开始 ==========
     // 在下面写：
-    void getRouters
-    void filterAsyncRouter
-    void router
-    throw new Error('请完成 stores/permission.js 中【学员填写 R1】generateRoutes')
+    const { data: res } = await getRouters()
+    const raw = res.data || []
+    sidebarRouters.value = raw
+    const accessRoutes = filterAsyncRouter(raw)
+    accessRoutes.forEach((r) => {
+      router.addRoute(r); if (r.name) addedRouteNames.value.push(r.name)
+    })
+    routesLoaded.value = true
+    return accessRoutes
     // ========== 【学员填写 R1】结束 ==========
   }
 
