@@ -9,6 +9,10 @@ When you create or update an implementation plan, sprint plan, roadmap slice, or
 
 1. Put the file under the **workspace root** `plan/` directory (not `plane/`, not the repo root, not chat-only).
 2. If `plan/` does not exist, **create it** before writing the first plan file.
-3. Prefer clear names, e.g. `01-feature-name.md`, `02-sprint-b.md`, or a short descriptive slug.
-4. Do not invent a parallel docs folder for plans unless the user explicitly asks.
-5. Short answers / one-off checklists in chat are fine; **persistent or multi-step plans** must be saved under `plan/`.
+3. Prefer splitting by side when the work is clearly backend or frontend:
+   - **Backend / API / Java**: `plan/backend/`
+   - **Frontend / taskforge-ui**: `plan/frontend/` (own sequence: `01-`, `02-`, …; do not continue backend numbers)
+   - Cross-cutting index stays at `plan/README.md`
+4. Prefer clear names, e.g. `01-feature-name.md`, `02-sprint-b.md`, or a short descriptive slug.
+5. Do not invent a parallel docs folder for plans unless the user explicitly asks.
+6. Short answers / one-off checklists in chat are fine; **persistent or multi-step plans** must be saved under `plan/` (in `backend/` or `frontend/` when applicable).

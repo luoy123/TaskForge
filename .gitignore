@@ -44,3 +44,9 @@ AGENTS.md
 
 ### log ###
 logs/
+
+### Node / frontend (taskforge-ui) ###
+node_modules/
+dist/
+dist-ssr/
+*.local

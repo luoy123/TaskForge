@@ -97,7 +97,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
     @Override
     public int insertDept(SysDept dept) {
         SysDept sysParentDept = sysDeptMapper.selectById(dept.getParentId());
-        if (UserConstants.DEPT_NORMAL.equals(sysParentDept.getStatus())) {
+        if (UserConstants.DEPT_DISABLE.equals(sysParentDept.getStatus())) {
             throw new ServiceException("部门停用，无法进行新增");
         }
 

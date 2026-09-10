@@ -14,7 +14,7 @@
 | ------------ | -------------------------------- |
 | Sprint A–F   | 完成                               |
 | **Sprint G** | **G1–G4 已实现；2026-09-07 联调通过**（template / zip 按计划不做） |
-| 再往后          | （可选）工作流 Sprint H → 逾期 Job / 统计加深 |
+| 再往后          | **前端 Sprint 01**（见 [`../frontend/01-sprint-h-ui.md`](../frontend/01-sprint-h-ui.md)）；工作流 / 逾期 Job 可后置 |
 
 
 ```text
