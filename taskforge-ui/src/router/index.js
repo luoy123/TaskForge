@@ -92,7 +92,7 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   // ========== 【学员填写 R3】开始 ==========
-  // 提示：
+  // 提示（填完 R1/R2 后再开；失败时 reset + 清 token，避免死循环）：
   // try {
   //   const { useUserStore } = await import('@/stores/user')
   //   const userStore = useUserStore()
@@ -105,8 +105,19 @@ router.beforeEach(async (to, _from, next) => {
   //   next('/login')
   // }
   //
-  // 过渡期：先放行静态路由，避免 R1 未填时整站进不去。填完 R1/R3 后改为上面逻辑。
-  next()
+  // 过渡期：先放行静态路由，避免 R1/R2 未填时整站进不去。
+  // 填完后：删掉下面这行 next()，改成上面 try/catch。
+  try {
+    const { useUserStore } = await import('@/stores/user')
+    const userStore = useUserStore()
+    if (!userStore.name) await userStore.fetchUserInfo()
+    await permissionStore.generateRoutes()
+    next({ ...to, replace: true })
+  } catch (e) {
+    permissionStore.resetRoutes()
+    localStorage.removeItem('Admin-Token')
+    next('/login')
+  }
   // ========== 【学员填写 R3】结束 ==========
 })
 

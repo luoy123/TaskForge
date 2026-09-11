@@ -31,7 +31,7 @@ plan/
 |------|------|
 | [01-sprint-h-ui.md](./frontend/01-sprint-h-ui.md) | 前端 Sprint 01：UI 骨架与系统管理页（已完成） |
 | [02-sprint-project-task.md](./frontend/02-sprint-project-task.md) | 前端 Sprint 02：项目列表 + 任务列表（已完成） |
-| [03-sprint-dynamic-routes.md](./frontend/03-sprint-dynamic-routes.md) | 前端 Sprint 03：getRouters 动态路由 + 侧栏 |
+| [03-sprint-dynamic-routes.md](./frontend/03-sprint-dynamic-routes.md) | 前端 Sprint 03：getRouters 动态路由 + 侧栏（已完成 · 可选收尾静态菜单） |
 
 ## 约定
 

@@ -25,16 +25,15 @@ export const usePermissionStore = defineStore('permission', () => {
    */
   async function generateRoutes() {
     // ========== 【学员填写 R1】开始 ==========
-    // 在下面写：
+    // 在下面写（按上方步骤 1～7；写完后删掉 throw）：
     const { data: res } = await getRouters()
     const raw = res.data || []
     sidebarRouters.value = raw
     const accessRoutes = filterAsyncRouter(raw)
-    accessRoutes.forEach((r) => {
-      router.addRoute(r); if (r.name) addedRouteNames.value.push(r.name)
-    })
+    accessRoutes.forEach((r) => { router.addRoute(r); if (r.name) addedRouteNames.value.push(r.name) })
     routesLoaded.value = true
     return accessRoutes
+
     // ========== 【学员填写 R1】结束 ==========
   }
 

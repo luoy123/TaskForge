@@ -82,16 +82,16 @@ request.post('/project/list', { pageNum, pageSize, keyword })
 
 ### 项目页 `views/project/list/index.vue`
 
-- [ ] **P-C** `getList`：`listProject(query)` → `records` / `total`
-- [ ] **P-D** `submitForm`：有 id 则 `editProject`，否则 `addProject`
-- [ ] **P-E** `handleDelete`：`delProject({ projectId })`
-- [ ] **P-T**（可选）跳转任务：`router.push({ path: '/project/task', query: { projectId } })`
+- [x] **P-C** `getList`：`listProject(query)` → `records` / `total`
+- [x] **P-D** `submitForm`：有 id 则 `editProject`，否则 `addProject`
+- [x] **P-E** `handleDelete`：`delProject({ projectId })`
+- [x] **P-T**（可选）跳转任务：`router.push({ path: '/project/task', query: { projectId } })`
 
 ### 任务页 `views/project/task/index.vue`
 
-- [ ] **T-C** `getList`：必须带 `route.query.projectId`
-- [ ] **T-D** `submitForm`：新增时写入 `projectId`
-- [ ] **T-E** `handleDelete`
+- [x] **T-C** `getList`：必须带 `route.query.projectId`
+- [x] **T-D** `submitForm`：新增时写入 `projectId`
+- [x] **T-E** `handleDelete`
 
 ### 进度勾选
 
@@ -104,10 +104,10 @@ request.post('/project/list', { pageNum, pageSize, keyword })
 
 ## 4. 验收标准
 
-- [ ] 侧栏能进项目列表，表格有后端数据
-- [ ] 能新增/编辑/删除项目（勿乱删生产重要数据；学习库随意）
-- [ ] 从项目点「任务」进入任务页，能增删改任务
-- [ ] 请求走 `/dev-api`，业务 `code === 200`
+- [x] 侧栏能进项目列表，表格有后端数据
+- [x] 能新增/编辑/删除项目（勿乱删生产重要数据；学习库随意）
+- [x] 从项目点「任务」进入任务页，能增删改任务
+- [x] 请求走 `/dev-api`，业务 `code === 200`
 
 ---
 

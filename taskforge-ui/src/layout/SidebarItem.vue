@@ -38,10 +38,15 @@ const hasChildren = computed(() => visibleChildren.value.length > 0)
  */
 function resolvePath(routePath) {
   // ========== 【学员填写 R4-path】开始 ==========
-  // 在下面写：
-  void routePath
-  void props
-  return props.basePath || '/'
+  // 在下面写（写完后删掉 void / 占位 return）：
+  // if (routePath.startsWith('/')) return routePath
+  // const base = props.basePath.replace(/\/$/, '')
+  // const seg = String(routePath || '').replace(/^\//, '')
+  // return seg ? `${base}/${seg}` : base || '/'
+  if(routePath.startsWith('/')) return routePath
+  const base = props.basePath.replace(/\/$/, '')
+  const seg = String(routePath || '').replace(/^\//, '')
+  return seg ? `${base}/${seg}` : base || '/'
   // ========== 【学员填写 R4-path】结束 ==========
 }
 </script>

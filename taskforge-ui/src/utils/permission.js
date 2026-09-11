@@ -28,10 +28,18 @@ export const COMPONENT_ALIAS = {
  */
 export function loadView(component) {
   // ========== 【学员填写 R2】开始 ==========
-  // 在下面写：
-  void component
-  void viewModules
-  throw new Error('请完成 utils/permission.js 中【学员填写 R2】loadView')
+  // 在下面写（写完后删掉 throw）：
+  // if (component === 'Layout') return () => import('@/layout/index.vue')
+  // if (component === 'ParentView') return () => import('@/layout/ParentView.vue')
+  // const path = COMPONENT_ALIAS[component] || component
+  // const key = `../views/${path}.vue`
+  // return viewModules[key] || (() => import('@/views/error/building.vue'))
+  if (component === 'Layout') return () => import('@/layout/index.vue')
+  if (component === 'ParentView') return () => import('@/layout/ParentView.vue')
+  const path = COMPONENT_ALIAS[component] || component
+  const key = `../views/${path}.vue`
+  return viewModules[key] || (() => import('@/views/error/building.vue'))
+
   // ========== 【学员填写 R2】结束 ==========
 }
 
