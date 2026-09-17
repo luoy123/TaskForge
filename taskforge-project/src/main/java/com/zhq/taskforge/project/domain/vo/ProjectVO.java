@@ -1,5 +1,7 @@
 package com.zhq.taskforge.project.domain.vo;
 
+import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -15,4 +17,10 @@ public class ProjectVO {
     private String cover;
 
     private Integer status;
+
+    /** 状态中文名（doing / select 出参用） */
+    private String statusName;
+
+    // 邀请或者移除
+    private List<Long> userIdList;
 }

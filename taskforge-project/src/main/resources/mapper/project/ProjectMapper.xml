@@ -82,4 +82,60 @@
           and deleted = 0
     </update>
 
+        <!-- I1：收藏列表 -->
+        <select id="selectMyCollectProjectList" resultType="com.zhq.taskforge.project.domain.vo.ProjectResVO">
+            select p.close_begin_time, p.close_end_time,
+                   p.id as projectId, p.project_code, p.project_name, p.user_id,
+                   su.nick_name,
+                   ps.stage_code, ps.stage_name,
+                   p.type as projectType, p.status, p.published, p.project_process,
+                   p.created_time, p.updated_time, p.description, p.cover,
+                   p.auto_update_process, p.open_prefix, p.prefix,
+                   p.open_task_private, p.msg_notify, p.notify_day
+            from pmhub_project p
+            left join pmhub_project_stage ps on p.project_stage_id = ps.id
+            left join pmhub_project_collection pc on p.id = pc.project_id
+            left join sys_user su on su.user_id = p.user_id
+            where pc.user_id = #{userId}
+              and p.deleted = 0
+            <if test="req.keyword != null and req.keyword != ''">
+                and (p.project_code like concat('%', #{req.keyword}, '%')
+                  or p.project_name like concat('%', #{req.keyword}, '%'))
+            </if>
+            <if test="req.stageCode != null and req.stageCode != ''">
+                and ps.stage_code = #{req.stageCode}
+            </if>
+            <if test="req.status != null and req.status != ''">
+                and p.status = #{req.status}
+            </if>
+            <if test="req.published != null and req.published != ''">
+                and p.published = #{req.published}
+            </if>
+            <if test="req.projectType != null and req.projectType != ''">
+                and p.type = #{req.projectType}
+            </if>
+            order by p.created_time desc
+        </select>
+    
+        <!-- I1：回收站（注意 deleted=1；不要用带 @TableLogic 的 selectById 去查） -->
+        <select id="selectRecycleProjectList" resultType="com.zhq.taskforge.project.domain.vo.ProjectResVO">
+            select p.close_begin_time, p.close_end_time,
+                   p.id as projectId, p.project_code, p.project_name, p.user_id,
+                   su.nick_name,
+                   ps.stage_code, ps.stage_name,
+                   p.type as projectType, p.status, p.published, p.project_process,
+                   p.created_time, p.updated_time, p.description, p.cover,
+                   p.auto_update_process, p.open_prefix, p.prefix,
+                   p.open_task_private, p.msg_notify, p.notify_day
+            from pmhub_project p
+            left join pmhub_project_stage ps on p.project_stage_id = ps.id
+            left join sys_user su on su.user_id = p.user_id
+            where p.deleted = 1
+            <if test="req.keyword != null and req.keyword != ''">
+                and (p.project_code like concat('%', #{req.keyword}, '%')
+                  or p.project_name like concat('%', #{req.keyword}, '%'))
+            </if>
+            order by p.created_time desc
+        </select>
+
 </mapper>

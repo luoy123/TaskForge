@@ -21,10 +21,13 @@ import com.zhq.taskforge.common.core.domain.R;
 import com.zhq.taskforge.common.enums.BusinessType;
 import com.zhq.taskforge.common.exception.ServiceException;
 import com.zhq.taskforge.project.domain.ProjectLog;
+import com.zhq.taskforge.project.domain.vo.ProjectVO;
+import com.zhq.taskforge.project.domain.vo.task.BurnDownChartVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExcelVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExportVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskReqVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskResVO;
+import com.zhq.taskforge.project.domain.vo.task.TaskStatusStatsVO;
 import com.zhq.taskforge.project.service.IProjectTaskService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -144,6 +147,28 @@ public class ProjectTaskController {
                 .sheet()
                 .doReadSync();
         return R.ok(projectTaskService.importTask(rows));
+    }
+
+    @PostMapping("/queryMyTaskList")
+    @Operation(summary = "我的任务列表")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_MY_LIST + "')")
+    public R<IPage<TaskResVO>> queryMyTaskList(@RequestBody TaskReqVO req) {
+        return R.ok(projectTaskService.queryMyTaskList(req));
+    }
+
+    @PostMapping("/situation")
+    @Operation(summary = "项目任务概况")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_SITUATION + "')")
+    public R<TaskStatusStatsVO> situation(@RequestBody ProjectVO vo) {
+        return R.ok(projectTaskService.queryTaskStatusStats(vo.getProjectId()));
+    }
+
+    @PostMapping("/burnDownChart")
+    @Operation(summary = "燃尽图（简化）")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_BURNDOWN + "','"
+            + PermissionConstants.PROJECT_TASK_SITUATION + "')")
+    public R<List<BurnDownChartVO>> burnDownChart(@RequestBody ProjectVO vo) {
+        return R.ok(projectTaskService.burnDownChart(vo.getProjectId()));
     }
 
     private void writeExcel(HttpServletResponse response, String sheetName, List<TaskExportVO> list)

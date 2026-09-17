@@ -8,7 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan({
         "com.zhq.taskforge.system.mapper",
         "com.zhq.taskforge.project.mapper",
-        "com.zhq.taskforge.workflow.mapper"
+        "com.zhq.taskforge.workflow.mapper",
+        "com.zhq.taskforge.quartz.mapper"
 })
 public class TaskForgeApplication {
 

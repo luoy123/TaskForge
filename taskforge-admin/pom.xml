@@ -59,6 +59,10 @@
             <artifactId>taskforge-workflow</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.zhq</groupId>
+            <artifactId>taskforge-quartz</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>

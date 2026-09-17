@@ -24,6 +24,7 @@
         <module>taskforge-system</module>
         <module>taskforge-project</module>
         <module>taskforge-workflow</module>
+        <module>taskforge-quartz</module>
         <module>taskforge-admin</module>
     </modules>
 
@@ -83,6 +84,11 @@
             <dependency>
                 <groupId>com.zhq</groupId>
                 <artifactId>taskforge-workflow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zhq</groupId>
+                <artifactId>taskforge-quartz</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

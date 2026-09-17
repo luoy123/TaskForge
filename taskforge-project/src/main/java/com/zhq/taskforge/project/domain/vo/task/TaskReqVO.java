@@ -42,4 +42,12 @@ public class TaskReqVO {
     private Long pageNum;
 
     private Long pageSize;
+
+    /**
+     * 我的任务列表类型
+     * 1 = 我执行的（user_id = 当前用户）
+     * 3 = 我创建的 (create_by = 当前用户名)
+     * 不传默认为1
+     */
+    private Integer type;
 }

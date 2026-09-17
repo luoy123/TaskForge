@@ -134,4 +134,56 @@
           and del_flag = '0'
         limit 1
     </select>
+
+    <select id = "queryMyExecutedTaskList" resultType="com.zhq.taskforge.project.domain.vo.task.TaskResVO">
+        select pt.id as taskId, pt.project_id, pt.status, pt.task_name,
+           pt.created_time, ps.stage_name
+    from pmhub_project_task pt
+             left join pmhub_project_stage ps on pt.project_stage_id = ps.id
+    where pt.deleted = 0
+    and pt.user_id = #{userId}
+    <if test="projectId != null and projectId != ''">
+        and pt.project_id = #{projectId}
+    </if>
+    order by pt.created_time desc
+    </select>
+
+    
+    <select id = "queryMyCreatedTaskList" resultType="com.zhq.taskforge.project.domain.vo.task.TaskResVO">
+        select pt.id as taskId, pt.project_id, pt.status, pt.task_name,
+           pt.created_time, ps.stage_name
+    from pmhub_project_task pt
+             left join pmhub_project_stage ps on pt.project_stage_id = ps.id
+    where pt.deleted = 0
+    and pt.created_by = #{userName}
+    <if test="projectId != null and projectId != ''">
+        and pt.project_id = #{projectId}
+    </if>
+    order by pt.created_time desc
+    </select>
+
+    <!-- 进行中：status=1 且未删，可限制当前用户是成员 -->
+    <select id="selectDoingProjectList"
+    resultType="com.zhq.taskforge.project.domain.vo.ProjectVO">
+    select p.id as projectId, p.project_name, p.status, p.cover
+    from pmhub_project p
+    inner join pmhub_project_member pm on p.id = pm.pt_id
+    where p.deleted = 0
+    and p.status = 1
+    and pm.type = 'project'
+    and pm.user_id = #{userId}
+    order by p.created_time desc
+    </select>
+
+    <!-- 下拉：我参与的，不管状态（回收站除外） -->
+    <select id="selectMyProjectOptions"
+    resultType="com.zhq.taskforge.project.domain.vo.ProjectVO">
+    select p.id as projectId, p.project_name, p.status
+    from pmhub_project p
+    inner join pmhub_project_member pm on p.id = pm.pt_id
+    where p.deleted = 0
+    and pm.type = 'project'
+    and pm.user_id = #{userId}
+    order by p.created_time desc
+    </select>
 </mapper>

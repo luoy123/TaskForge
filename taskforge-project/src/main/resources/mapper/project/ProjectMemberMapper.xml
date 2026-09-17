@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.project.mapper.ProjectMemberMapper">
+    <!-- 不做 sys_user_role 多行 join，避免同一成员因多角色翻倍、分页 total 失真 -->
+    <select id="selectMemberPage" resultType="com.zhq.taskforge.project.domain.vo.member.ProjectMemberResVO">
+        select pm.user_id,
+               su.user_name,
+               su.nick_name,
+               su.email,
+               sd.dept_name,
+               (select sr.role_name
+                from sys_user_role sur
+                         left join sys_role sr on sr.role_id = sur.role_id
+                where sur.user_id = su.user_id
+                order by sur.role_id
+                limit 1) as role_name,
+               pm.creator,
+               pm.joined_time
+        from pmhub_project_member pm
+                 inner join sys_user su on pm.user_id = su.user_id
+                 left join sys_dept sd on su.dept_id = sd.dept_id
+        where pm.pt_id = #{req.projectId}
+          and pm.type = 'project'
+        <if test="req.keyword != null and req.keyword != ''">
+            and (su.nick_name like concat('%', #{req.keyword}, '%')
+              or su.email like concat('%', #{req.keyword}, '%'))
+        </if>
+        order by pm.joined_time asc
+    </select>
+
+
+</mapper>

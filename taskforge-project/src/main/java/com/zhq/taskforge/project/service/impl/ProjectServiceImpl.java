@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhq.taskforge.common.enums.LogTypeEnum;
 import com.zhq.taskforge.common.enums.ProjectStageEnum;
 import com.zhq.taskforge.common.enums.ProjectStatusEnum;
@@ -31,6 +31,7 @@ import com.zhq.taskforge.project.mapper.ProjectMemberMapper;
 import com.zhq.taskforge.project.mapper.ProjectStageMapper;
 import com.zhq.taskforge.project.mapper.ProjectTaskMapper;
 import com.zhq.taskforge.project.service.IProjectService;
+import com.zhq.taskforge.project.service.project.QueryProjectFactory;
 
 import cn.hutool.core.util.IdUtil;
 
@@ -49,28 +50,31 @@ public class ProjectServiceImpl implements IProjectService {
     private ProjectCollectionMapper projectCollectionMapper;
     @Autowired
     private ProjectTaskMapper projectTaskMapper;
+    @Autowired
+    private QueryProjectFactory queryProjectFactory;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveProject(Project project) {
-        // TODO E2: 
+        // TODO E2:
         // 1. projectCode = "P" + 序列（可用 IdUtil / 自写 Seq）
-        //雪花算法：分布式下唯一且大致有序的Long ID
+        // 雪花算法：分布式下唯一且大致有序的Long ID
         project.setProjectCode("p" + IdUtil.getSnowflakeNextIdStr());
-        // 2. 填 userId、createdBy、createdTime、updated*；建议显式 deleted/status/archived/published/stageCode 默认值
+        // 2. 填 userId、createdBy、createdTime、updated*；建议显式
+        // deleted/status/archived/published/stageCode 默认值
         project.setUserId(SecurityUtils.getUserId());
         project.setCreatedBy(SecurityUtils.getUsername());
         project.setCreatedTime(LocalDateTime.now());
         project.setUpdatedBy(SecurityUtils.getUsername());
         project.setUpdatedTime(LocalDateTime.now());
-        // 3. projectMapper.insert(project)  —— insert 后 project.getId() 有值
+        // 3. projectMapper.insert(project) —— insert 后 project.getId() 有值
         projectMapper.insert(project);
         // 4. 遍历 ProjectStageEnum，insert 全部阶段,就是每个项目在创建后会有五个模板存放到数据库中。
-        for(ProjectStageEnum stage : ProjectStageEnum.values()){
-            ProjectStage  projectStage = new ProjectStage();
-            projectStage.setProjectId(project.getId());//归属于那个项目
-            projectStage.setStageCode(stage.getStatus());//阶段代码
-            projectStage.setStageName(stage.getStatusName());//阶段名称
+        for (ProjectStageEnum stage : ProjectStageEnum.values()) {
+            ProjectStage projectStage = new ProjectStage();
+            projectStage.setProjectId(project.getId());// 归属于那个项目
+            projectStage.setStageCode(stage.getStatus());// 阶段代码
+            projectStage.setStageName(stage.getStatusName());// 阶段名称
 
             projectStage.setCreatedBy(SecurityUtils.getUsername());
             projectStage.setCreatedTime(LocalDateTime.now());
@@ -80,9 +84,9 @@ public class ProjectServiceImpl implements IProjectService {
         }
         // 5. 查 STAGE_0，回写 projectStageId，updateById
         LambdaQueryWrapper<ProjectStage> qw = new LambdaQueryWrapper<ProjectStage>();
-        qw.eq(ProjectStage::getProjectId,project.getId())
-            .eq(ProjectStage::getStageCode,ProjectStageEnum.STAGE_0.getStatus());
-            ProjectStage selectOne = projectStageMapper.selectOne(qw);
+        qw.eq(ProjectStage::getProjectId, project.getId())
+                .eq(ProjectStage::getStageCode, ProjectStageEnum.STAGE_0.getStatus());
+        ProjectStage selectOne = projectStageMapper.selectOne(qw);
         project.setProjectStageId(selectOne.getId());
         project.setStageCode(selectOne.getStageCode());
         projectMapper.updateById(project);
@@ -101,7 +105,7 @@ public class ProjectServiceImpl implements IProjectService {
 
         // 7. 写日志 create + inviteMember（可抽 private saveLog）
         saveLog("create", project.getId(), null);
-        saveLog("inviteMember",project.getId(),SecurityUtils.getUserId());
+        saveLog("inviteMember", project.getId(), SecurityUtils.getUserId());
     }
 
     @Override
@@ -168,19 +172,23 @@ public class ProjectServiceImpl implements IProjectService {
         long pageNum = req.getPageNum() == null ? 1L : req.getPageNum();
         long pageSize = req.getPageSize() == null ? 10L : req.getPageSize();
         Page<ProjectResVO> page = new Page<>(pageNum, pageSize);
-        IPage<ProjectResVO> result = projectMapper.selectMyProjectList(page, SecurityUtils.getUserId(), req);
-
+        // IPage<ProjectResVO> result = projectMapper.selectMyProjectList(page,
+        // SecurityUtils.getUserId(), req);
+        IPage<ProjectResVO> result = queryProjectFactory.execute(page, req);
         for (ProjectResVO vo : result.getRecords()) {
             vo.setStatusName(ProjectStatusEnum.getStatusNameByStatus(vo.getStatus()));
             vo.setProjectTypeName(
                     vo.getProjectType() != null && vo.getProjectType() == 1 ? "私有" : "公开");
             vo.setPublishedName(
                     vo.getPublished() != null && vo.getPublished() == 1 ? "已发布" : "未发布");
-
-            LambdaQueryWrapper<ProjectCollection> qw = new LambdaQueryWrapper<>();
-            qw.eq(ProjectCollection::getUserId, SecurityUtils.getUserId())
-                    .eq(ProjectCollection::getProjectId, vo.getProjectId());
-            vo.setCollected(projectCollectionMapper.selectOne(qw) != null);
+            if ("recycle".equals(req.getType())) {
+                vo.setCollected(false);
+            } else {
+                LambdaQueryWrapper<ProjectCollection> qw = new LambdaQueryWrapper<>();
+                qw.eq(ProjectCollection::getUserId, SecurityUtils.getUserId())
+                        .eq(ProjectCollection::getProjectId, vo.getProjectId());
+                vo.setCollected(projectCollectionMapper.selectOne(qw) != null);
+            }
         }
 
         return result;
@@ -257,7 +265,7 @@ public class ProjectServiceImpl implements IProjectService {
     @Override
     public void archived(String projectId) {
         Project project = projectMapper.selectById(projectId);
-        if(project == null){
+        if (project == null) {
             throw new ServiceException("项目不存在");
         }
         if (project.getPublished() == null || project.getPublished() == 0) {

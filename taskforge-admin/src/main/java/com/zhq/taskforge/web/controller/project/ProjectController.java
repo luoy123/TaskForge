@@ -1,8 +1,11 @@
 package com.zhq.taskforge.web.controller.project;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,8 +19,10 @@ import com.zhq.taskforge.common.enums.BusinessType;
 import com.zhq.taskforge.project.domain.Project;
 import com.zhq.taskforge.project.domain.vo.ProjectReqVO;
 import com.zhq.taskforge.project.domain.vo.ProjectResVO;
+import com.zhq.taskforge.project.domain.vo.ProjectStatisticsResVO;
 import com.zhq.taskforge.project.domain.vo.ProjectVO;
 import com.zhq.taskforge.project.service.IProjectService;
+import com.zhq.taskforge.project.service.IProjectTaskService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +34,8 @@ public class ProjectController {
 
     @Autowired
     private IProjectService projectService;
+    @Autowired
+    private IProjectTaskService projectTaskService;
 
     @PostMapping("/add")
     @Operation(summary = "新增项目")
@@ -112,5 +119,26 @@ public class ProjectController {
     public R<Void> cancelCollect(@RequestBody ProjectVO projectVO) {
         projectService.uncollect(projectVO.getProjectId());
         return R.ok();
+    }
+
+    @GetMapping("/statistics")
+    @Operation(summary = "首页统计")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_STATISTICS + "')")
+    public R<ProjectStatisticsResVO> statistics() {
+        return R.ok(projectTaskService.statistics());
+    }
+
+    @GetMapping("/doing")
+    @Operation(summary = "进行中的项目")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_DOING + "')")
+    public R<List<ProjectVO>> doing() {
+        return R.ok(projectTaskService.queryDoingProject());
+    }
+
+    @GetMapping("/select")
+    @Operation(summary = "我参与的项目（下拉）")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_SELECT + "')")
+    public R<List<ProjectVO>> select() {
+        return R.ok(projectTaskService.queryMyProjectOptions());
     }
 }
