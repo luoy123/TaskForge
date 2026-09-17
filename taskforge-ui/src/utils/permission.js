@@ -8,7 +8,16 @@ const viewModules = import.meta.glob('../views/**/*.vue')
 /** 库里仍是 pmhub 路径时，映射到本仓库已有页面 */
 export const COMPONENT_ALIAS = {
   'pmhub-project/my-project': 'project/list/index',
-  'pmhub-project/my-task': 'project/task/index',
+  'pmhub-project/my-collection': 'project/list/index',
+  'pmhub-project/recycle-bin': 'project/list/index',
+  'pmhub-project/my-task': 'project/my-task/index',
+}
+
+/** 同一 list 页按菜单 component 定默认 Tab */
+export const PROJECT_LIST_TYPE_BY_COMPONENT = {
+  'pmhub-project/my-project': 'my',
+  'pmhub-project/my-collection': 'collect',
+  'pmhub-project/recycle-bin': 'recycle',
 }
 
 /**

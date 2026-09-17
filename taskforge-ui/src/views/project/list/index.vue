@@ -1,5 +1,32 @@
 <template>
   <div class="page">
+    <el-tabs
+      v-if="!menuFixedType"
+      v-model="query.type"
+      @tab-change="handleTypeChange"
+    >
+      <el-tab-pane label="我的项目" name="my" />
+      <el-tab-pane label="收藏" name="collect" />
+      <el-tab-pane label="回收站" name="recycle" />
+    </el-tabs>
+
+    <el-alert
+      v-if="query.type === 'collect'"
+      type="info"
+      :closable="false"
+      show-icon
+      title="收藏：只显示你点过「收藏」的项目（不是归档）。"
+      class="hint"
+    />
+    <el-alert
+      v-else-if="query.type === 'recycle'"
+      type="info"
+      :closable="false"
+      show-icon
+      title="回收站：只显示「删除」过的项目。归档仍在「我的项目」里。"
+      class="hint"
+    />
+
     <el-form :inline="true" :model="query" class="toolbar" @submit.prevent>
       <el-form-item label="关键词">
         <el-input v-model="query.keyword" clearable placeholder="项目名称" />
@@ -7,7 +34,7 @@
       <el-form-item>
         <el-button type="primary" @click="handleQuery">搜索</el-button>
         <el-button @click="resetQuery">重置</el-button>
-        <el-button type="success" @click="openDialog()">新增</el-button>
+        <el-button v-hasPermi="'project:manage:add'" type="success" @click="openDialog()">新增</el-button>
       </el-form-item>
     </el-form>
 
@@ -17,13 +44,68 @@
       <el-table-column prop="stageName" label="阶段" width="120" />
       <el-table-column prop="nickName" label="负责人" width="120" />
       <el-table-column prop="createdTime" label="创建时间" width="180" />
-      <el-table-column label="操作" width="220" fixed="right">
+      <el-table-column label="操作" width="480" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="goTasks(row)">任务</el-button>
-          <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-          <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+          <el-button
+            v-hasPermi="'project:member:list'"
+            link
+            type="primary"
+            @click="openMembers(row)"
+          >成员</el-button>
+          <el-button
+            v-hasPermi="'project:file:queryFileList'"
+            link
+            type="primary"
+            @click="openFiles(row)"
+          >附件</el-button>
+          <el-button
+            v-hasPermi="'project:manage:edit'"
+            link
+            type="primary"
+            @click="openDialog(row)"
+          >编辑</el-button>
+          <el-button
+            v-if="!row.collected"
+            v-hasPermi="'project:manage:collect'"
+            link
+            type="warning"
+            @click="handleCollect(row)"
+          >收藏</el-button>
+          <el-button
+            v-else
+            v-hasPermi="'project:manage:cancelCollect'"
+            link
+            type="info"
+            @click="handleCancelCollect(row)"
+          >取消收藏</el-button>
+          <el-button
+            v-if="query.type !== 'recycle'"
+            v-hasPermi="'project:manage:archive'"
+            link
+            type="warning"
+            @click="handleArchive(row)"
+          >归档</el-button>
+          <el-button
+            v-if="query.type !== 'recycle'"
+            v-hasPermi="'project:manage:delete'"
+            link
+            type="danger"
+            @click="handleDelete(row)"
+          >删除</el-button>
         </template>
       </el-table-column>
+      <template #empty>
+        <el-empty
+          :description="
+            query.type === 'collect'
+              ? '暂无收藏。去「我的项目」点「收藏」即可出现在这里。'
+              : query.type === 'recycle'
+                ? '回收站为空。只有点「删除」的项目会进来（归档不会）。'
+                : '暂无项目'
+          "
+        />
+      </template>
     </el-table>
 
     <div class="pager">
@@ -52,16 +134,46 @@
         <el-button type="primary" :loading="submitLoading" @click="submitForm">确定</el-button>
       </template>
     </el-dialog>
+
+    <MemberDrawer
+      v-model="memberVisible"
+      :project-id="activeProjectId"
+      :project-name="activeProjectName"
+    />
+    <FilePanel
+      v-model="fileVisible"
+      :biz-id="activeProjectId"
+      file-type="project"
+    />
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { addProject, delProject, editProject, listProject } from '@/api/project/project'
+import {
+  addProject,
+  archiveProject,
+  cancelCollectProject,
+  collectProject,
+  delProject,
+  editProject,
+  listProject,
+} from '@/api/project/project'
+import FilePanel from '@/components/project/FilePanel.vue'
+import MemberDrawer from '@/components/project/MemberDrawer.vue'
+import { PROJECT_LIST_TYPE_BY_COMPONENT } from '@/utils/permission'
 
+const route = useRoute()
 const router = useRouter()
+
+/** 侧栏「我的收藏 / 回收站」等独立菜单：按 component 定死 type，不再显示 Tab */
+const menuFixedType = computed(() => {
+  const c = route.meta?.component
+  return (c && PROJECT_LIST_TYPE_BY_COMPONENT[c]) || ''
+})
+
 const loading = ref(false)
 const submitLoading = ref(false)
 const tableData = ref([])
@@ -69,14 +181,25 @@ const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增项目')
 const formRef = ref()
+const memberVisible = ref(false)
+const fileVisible = ref(false)
+const activeProjectId = ref('')
+const activeProjectName = ref('')
 
 const query = reactive({
   pageNum: 1,
   pageSize: 10,
   keyword: '',
+  /** I1：my | collect | recycle */
+  type: 'my',
 })
 
-/** 编辑时用 projectId；提交给后端时 edit 用 id 字段（与实体一致） */
+function syncTypeFromMenu() {
+  if (menuFixedType.value) {
+    query.type = menuFixedType.value
+  }
+}
+
 const form = reactive({
   projectId: undefined,
   projectName: '',
@@ -116,57 +239,62 @@ function resetQuery() {
   handleQuery()
 }
 
+function handleTypeChange(name) {
+  // 用 tab-change 回传的 name，避免偶发读到旧 type
+  if (name) query.type = name
+  query.pageNum = 1
+  getList()
+}
+
 function goTasks(row) {
   router.push({ path: '/project/task', query: { projectId: row.projectId } })
 }
 
-/** ========== 【学员填写 P-C】项目列表 ==========
- * 注意：listProject 是 POST，参数直接传对象，不是 { params }
- * const { data: res } = await listProject(query)
- * tableData = res.data.records；total = res.data.total
- */
+function openMembers(row) {
+  activeProjectId.value = row.projectId
+  activeProjectName.value = row.projectName || ''
+  memberVisible.value = true
+}
+
+function openFiles(row) {
+  activeProjectId.value = row.projectId
+  fileVisible.value = true
+}
+
 async function getList() {
-  // TODO P-C
   loading.value = true
-  try{
+  try {
     const { data: res } = await listProject(query)
     tableData.value = res.data.records || []
     total.value = res.data.total || 0
-  }finally{
+  } finally {
     loading.value = false
   }
 }
 
-/** ========== 【学员填写 P-D】新增/编辑 ==========
- * 有 form.projectId → editProject({ projectId, projectName, description })
- * 否则 → addProject({ projectName, description })
- * （后端 edit 会用 projectId 填到实体 id）
- */
 async function submitForm() {
-  // TODO P-D
   await formRef.value.validate()
   submitLoading.value = true
-  try{
-    if(form.projectId){
-      await editProject({ projectId: form.projectId, projectName: form.projectName, description: form.description })
+  try {
+    if (form.projectId) {
+      await editProject({
+        projectId: form.projectId,
+        projectName: form.projectName,
+        description: form.description,
+      })
       ElMessage.success('修改成功')
-    }else{
+    } else {
       await addProject({ projectName: form.projectName, description: form.description })
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false
     getList()
-  }finally{
+  } finally {
     submitLoading.value = false
   }
 }
 
-/** ========== 【学员填写 P-E】删除 ==========
- * await delProject({ projectId: row.projectId })
- * axios delete 带 body：api 里已写成 { data }
- */
 async function handleDelete(row) {
-  // TODO P-E
   await ElMessageBox.confirm('确定删除该项目吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -177,9 +305,42 @@ async function handleDelete(row) {
   getList()
 }
 
+/** 【学员填写 F04-3】二次确认后调 archiveProject({ projectId }) */
+async function handleArchive(row) {
+  await ElMessageBox.confirm(`确定归档「${row.projectName}」吗？`, '提示', { type: 'warning' })
+  await archiveProject({ projectId: row.projectId })
+  ElMessage.success('已归档')
+  getList()
+}
+
+/** 【学员填写 F04-3】collectProject({ projectId }) */
+async function handleCollect(row) {
+  await collectProject({ projectId: row.projectId })
+  ElMessage.success('已收藏')
+  getList()
+}
+
+/** 【学员填写 F04-3】cancelCollectProject({ projectId }) */
+async function handleCancelCollect(row) {
+  await cancelCollectProject({ projectId: row.projectId })
+  ElMessage.success('已取消收藏')
+  getList()
+}
+
 onMounted(() => {
+  syncTypeFromMenu()
   getList()
 })
+
+/** 同一 list 组件被多个菜单复用，侧栏切换时要改 type 并重新拉列表 */
+watch(
+  () => route.meta?.component,
+  () => {
+    syncTypeFromMenu()
+    query.pageNum = 1
+    getList()
+  },
+)
 </script>
 
 <style scoped>
@@ -189,6 +350,9 @@ onMounted(() => {
   gap: 12px;
 }
 .toolbar {
+  margin-bottom: 0;
+}
+.hint {
   margin-bottom: 0;
 }
 .pager {

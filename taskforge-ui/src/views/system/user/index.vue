@@ -7,7 +7,7 @@
       <el-form-item>
         <el-button type="primary" @click="handleQuery">搜索</el-button>
         <el-button @click="resetQuery">重置</el-button>
-        <el-button type="success" @click="openDialog()">新增</el-button>
+        <el-button v-hasPermi="'system:user:add'" type="success" @click="openDialog()">新增</el-button>
       </el-form-item>
     </el-form>
 
@@ -25,8 +25,8 @@
       </el-table-column>
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-          <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+          <el-button v-hasPermi="'system:user:edit'" link type="primary" @click="openDialog(row)">编辑</el-button>
+          <el-button v-hasPermi="'system:user:remove'" link type="danger" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

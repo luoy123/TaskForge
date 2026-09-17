@@ -17,21 +17,59 @@
     <template v-else>
       <el-form :inline="true" class="toolbar" @submit.prevent>
         <el-form-item>
-          <el-button type="success" @click="openDialog()">新增任务</el-button>
+          <el-button v-hasPermi="'project:task:add'" type="success" @click="openDialog()">新增任务</el-button>
           <el-button @click="getList">刷新</el-button>
+          <el-button
+            v-hasPermi="'project:task:list'"
+            :disabled="!selectedIds.length"
+            @click="handleExportSelected"
+          >导出选中</el-button>
+          <el-button v-hasPermi="'project:task:list'" @click="handleExportAll">导出全部</el-button>
+          <el-upload
+            v-hasPermi="'project:task:import'"
+            :show-file-list="false"
+            :http-request="handleImport"
+            accept=".xlsx,.xls"
+            style="display: inline-block; margin-left: 8px"
+          >
+            <el-button type="warning">导入 Excel</el-button>
+          </el-upload>
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" border>
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        border
+        @selection-change="onSelectionChange"
+      >
+        <el-table-column type="selection" width="45" />
         <el-table-column prop="taskName" label="任务名称" min-width="160" />
         <el-table-column prop="statusName" label="状态" width="100" />
         <el-table-column prop="priorityName" label="优先级" width="100" />
         <el-table-column prop="nickName" label="执行人" width="120" />
         <el-table-column prop="createdTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button
+              v-hasPermi="'project:file:queryFileList'"
+              link
+              type="primary"
+              @click="openFiles(row)"
+            >附件</el-button>
+            <el-button
+              v-hasPermi="'project:task:edit'"
+              link
+              type="primary"
+              @click="openDialog(row)"
+            >编辑</el-button>
+            <el-button
+              v-hasPermi="'project:task:delete'"
+              link
+              type="danger"
+              @click="handleDelete(row)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -63,6 +101,14 @@
         <el-button type="primary" :loading="submitLoading" @click="submitForm">确定</el-button>
       </template>
     </el-dialog>
+
+    <FilePanel v-model="fileVisible" :biz-id="activeTaskId" file-type="task" />
+    <TaskDetailDrawer
+      v-model="detailVisible"
+      :task-id="detailTaskId"
+      :project-id="projectId"
+      :task-name="detailTaskName"
+    />
   </div>
 </template>
 
@@ -70,7 +116,18 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { addTask, delTask, editTask, listTask } from '@/api/project/task'
+import {
+  addTask,
+  delTask,
+  editTask,
+  exportAllTasks,
+  exportTasks,
+  importTasks,
+  listTask,
+} from '@/api/project/task'
+import FilePanel from '@/components/project/FilePanel.vue'
+import TaskDetailDrawer from '@/components/project/TaskDetailDrawer.vue'
+import { saveBlobResponse } from '@/utils/download'
 
 const route = useRoute()
 const router = useRouter()
@@ -84,6 +141,12 @@ const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增任务')
 const formRef = ref()
+const selectedIds = ref([])
+const fileVisible = ref(false)
+const activeTaskId = ref('')
+const detailVisible = ref(false)
+const detailTaskId = ref('')
+const detailTaskName = ref('')
 
 const query = reactive({
   pageNum: 1,
@@ -119,60 +182,112 @@ function openDialog(row) {
   dialogVisible.value = true
 }
 
-/** ========== 【学员填写 T-C】任务列表 ==========
- * 若无 projectId 直接 return
- * await listTask({ projectId: projectId.value, pageNum, pageSize })
- * records / total 同用户页
- */
+function openFiles(row) {
+  activeTaskId.value = row.taskId
+  fileVisible.value = true
+}
+
+function openDetail(row) {
+  detailTaskId.value = row.taskId
+  detailTaskName.value = row.taskName || ''
+  detailVisible.value = true
+}
+
+function onSelectionChange(rows) {
+  selectedIds.value = (rows || []).map((r) => r.taskId)
+}
+
 async function getList() {
-  // TODO T-C
-  if(!projectId.value){
+  if (!projectId.value) {
     tableData.value = []
     total.value = 0
     return
   }
   loading.value = true
-  try{
-   const { data: res } = await listTask({ projectId: projectId.value, pageNum: query.pageNum, pageSize: query.pageSize })
-   tableData.value = res.data.records || []
-   total.value = res.data.total || 0
-  }finally{
+  try {
+    const { data: res } = await listTask({
+      projectId: projectId.value,
+      pageNum: query.pageNum,
+      pageSize: query.pageSize,
+    })
+    tableData.value = res.data.records || []
+    total.value = res.data.total || 0
+  } finally {
     loading.value = false
   }
 }
 
-/** ========== 【学员填写 T-D】新增/编辑 ==========
- * 新增：addTask({ projectId: projectId.value, taskName, description })
- * 编辑：editTask({ taskId, taskName, description })
- */
 async function submitForm() {
-  // TODO T-D
   await formRef.value.validate()
   submitLoading.value = true
-  try{
-    if(form.taskId){
-      await editTask({ taskId: form.taskId, taskName: form.taskName, description: form.description })
+  try {
+    if (form.taskId) {
+      await editTask({
+        taskId: form.taskId,
+        taskName: form.taskName,
+        description: form.description,
+      })
       ElMessage.success('修改成功')
-    }else{
-      await addTask({ projectId: projectId.value, taskName: form.taskName, description: form.description })
+    } else {
+      await addTask({
+        projectId: projectId.value,
+        taskName: form.taskName,
+        description: form.description,
+      })
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false
     getList()
-  }finally{
+  } finally {
     submitLoading.value = false
   }
 }
 
-/** ========== 【学员填写 T-E】删除 ==========
- * delTask({ taskId: row.taskId })
- */
 async function handleDelete(row) {
-  // TODO T-E
   await ElMessageBox.confirm(`确认删除任务「${row.taskName}」？`, '提示', { type: 'warning' })
-  await delTask({taskId: row.taskId})
+  await delTask({ taskId: row.taskId })
   ElMessage.success('删除成功')
   getList()
+}
+
+/** 【学员填写 F04-6】exportTasks({ taskIds }) → saveBlobResponse */
+async function handleExportSelected() {
+  if (!selectedIds.value.length) {
+    ElMessage.warning('请先勾选任务')
+    return
+  }
+  try {
+    const response = await exportTasks({ taskIds: selectedIds.value })
+    await saveBlobResponse(response, '任务导出.xlsx')
+    ElMessage.success('导出成功')
+  } catch (e) {
+    ElMessage.error(e.message || '导出失败')
+  }
+}
+
+/** 【学员填写 F04-6】exportAllTasks() */
+async function handleExportAll() {
+  try {
+    const response = await exportAllTasks()
+    await saveBlobResponse(response, '我的任务.xlsx')
+    ElMessage.success('导出成功')
+  } catch (e) {
+    ElMessage.error(e.message || '导出失败')
+  }
+}
+
+/** 【学员填写 F04-6】FormData + importTasks；成功后刷新列表 */
+async function handleImport(option) {
+  const formData = new FormData()
+  formData.append('file', option.file)
+  try {
+    const { data: res } = await importTasks(formData)
+    ElMessage.success(res.data || '导入成功')
+    option.onSuccess?.()
+    getList()
+  } catch (e) {
+    option.onError?.(e)
+  }
 }
 
 watch(projectId, () => {

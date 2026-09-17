@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { usePermissionStore } from '@/stores/permission'
 
 /**
- * 常量路由：始终存在。
- * F03 过渡：业务页仍暂时挂在这里，等动态路由联调通过后再删 system/project 子路由。
+ * 常量路由：只保留公开页 + 布局壳 + 首页。
+ * 业务页全部走 getRouters 动态挂载（F04-2）。
  */
 export const constantRoutes = [
   {
@@ -24,43 +24,6 @@ export const constantRoutes = [
         component: () => import('@/views/home/index.vue'),
         meta: { title: '首页' },
       },
-      // —— F03 静态兜底（动态 OK 后可删）——
-      {
-        path: 'system/user',
-        name: 'SystemUser',
-        component: () => import('@/views/system/user/index.vue'),
-        meta: { title: '用户管理' },
-      },
-      {
-        path: 'system/role',
-        name: 'SystemRole',
-        component: () => import('@/views/system/role/index.vue'),
-        meta: { title: '角色管理' },
-      },
-      {
-        path: 'system/menu',
-        name: 'SystemMenu',
-        component: () => import('@/views/system/menu/index.vue'),
-        meta: { title: '菜单管理' },
-      },
-      {
-        path: 'system/dept',
-        name: 'SystemDept',
-        component: () => import('@/views/system/dept/index.vue'),
-        meta: { title: '部门管理' },
-      },
-      {
-        path: 'project/list',
-        name: 'ProjectList',
-        component: () => import('@/views/project/list/index.vue'),
-        meta: { title: '项目列表' },
-      },
-      {
-        path: 'project/task',
-        name: 'ProjectTask',
-        component: () => import('@/views/project/task/index.vue'),
-        meta: { title: '任务列表' },
-      },
     ],
   },
 ]
@@ -70,10 +33,6 @@ const router = createRouter({
   routes: constantRoutes,
 })
 
-/**
- * 【学员填写 R3】有 token 且动态路由未加载时：generateRoutes，再 next({ ...to, replace: true })
- * 注意：不要在每次导航都 addRoute；失败时别死循环。
- */
 router.beforeEach(async (to, _from, next) => {
   const token = localStorage.getItem('Admin-Token')
   if (to.meta.public) {
@@ -91,22 +50,6 @@ router.beforeEach(async (to, _from, next) => {
     return
   }
 
-  // ========== 【学员填写 R3】开始 ==========
-  // 提示（填完 R1/R2 后再开；失败时 reset + 清 token，避免死循环）：
-  // try {
-  //   const { useUserStore } = await import('@/stores/user')
-  //   const userStore = useUserStore()
-  //   if (!userStore.name) await userStore.fetchUserInfo()
-  //   await permissionStore.generateRoutes()
-  //   next({ ...to, replace: true })
-  // } catch (e) {
-  //   permissionStore.resetRoutes()
-  //   localStorage.removeItem('Admin-Token')
-  //   next('/login')
-  // }
-  //
-  // 过渡期：先放行静态路由，避免 R1/R2 未填时整站进不去。
-  // 填完后：删掉下面这行 next()，改成上面 try/catch。
   try {
     const { useUserStore } = await import('@/stores/user')
     const userStore = useUserStore()
@@ -118,7 +61,6 @@ router.beforeEach(async (to, _from, next) => {
     localStorage.removeItem('Admin-Token')
     next('/login')
   }
-  // ========== 【学员填写 R3】结束 ==========
 })
 
 export default router

@@ -7,31 +7,11 @@
           <span>首页</span>
         </el-menu-item>
 
-        <!-- F03：动态侧栏（填完 R1 + R4 后会出现 getRouters 菜单） -->
         <SidebarItem
           v-for="route in permissionStore.sidebarRouters"
           :key="route.path || route.name"
           :item="route"
         />
-
-        <!-- F03 过渡：静态菜单兜底；动态侧栏 OK 后整段删除 -->
-        <template v-if="!permissionStore.sidebarRouters.length">
-          <el-sub-menu index="system">
-            <template #title>
-              <span>系统管理</span>
-            </template>
-            <el-menu-item index="/system/user"><span>用户管理</span></el-menu-item>
-            <el-menu-item index="/system/role"><span>角色管理</span></el-menu-item>
-            <el-menu-item index="/system/menu"><span>菜单管理</span></el-menu-item>
-            <el-menu-item index="/system/dept"><span>部门管理</span></el-menu-item>
-          </el-sub-menu>
-          <el-sub-menu index="project">
-            <template #title>
-              <span>项目管理</span>
-            </template>
-            <el-menu-item index="/project/list"><span>项目列表</span></el-menu-item>
-          </el-sub-menu>
-        </template>
       </el-menu>
     </el-aside>
     <el-container>

@@ -1,0 +1,19 @@
+---
+description: After finishing a module/sprint slice, remind the user to commit (do not auto-commit)
+alwaysApply: true
+---
+
+# Remind commit after a module is done
+
+When a **module / Sprint 切片 / 独立功能块** has been fully handled in this conversation (implementation + smoke check or clear “做完了” signal):
+
+1. **Do not** create a git commit unless the user explicitly asks.
+2. **Do** end that wrap-up with a short commit reminder, for example:
+   - 本模块已完成，建议现在提交一版（可以说「帮我提交」）。
+   - Optionally one-line suggested commit focus (why), not a full dump of `git status`.
+3. Triggers that count as “模块完成” (any one is enough):
+   - User says a Sprint/模块/功能做完了, or asks to stop after finishing it
+   - You finished the planned acceptance for that slice (API + 关键 or agreed checklist)
+   - You clearly closed a numbered plan item (e.g. Sprint F/G/H 某一刀) and are not continuing into the next
+4. Do **not** nag on every small edit, typo fix, or mid-module partial step.
+5. If there is nothing to commit (clean tree), skip the reminder or say 工作区干净、无需提交.

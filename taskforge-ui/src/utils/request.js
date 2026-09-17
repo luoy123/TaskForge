@@ -27,6 +27,10 @@ service.interceptors.request.use(
 
 service.interceptors.response.use(
   (response) => {
+    // 导出 / 下载：不按 R<code> 解析
+    if (response.config.responseType === 'blob') {
+      return response
+    }
     const res = response.data
     if (res.code !== 200) {
       ElMessage.error(res.message || '请求失败')

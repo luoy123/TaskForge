@@ -8,7 +8,7 @@ alwaysApply: true
 When the task involves **callers/callees, impact analysis, route/handler chains, architecture navigation, or “who uses X”** in the current workspace:
 
 1. **Prefer the `codegraph` MCP** (configured in `~/.cursor/mcp.json`) over ad-hoc broad `Grep` / multi-file reads for relationship questions.
-2. Use `CallMcpTool` with the `codegraph` server and tools such as explore / callers / callees / impact / context (read the tool descriptor first if unsure of exact names).
+2. Use `CallMcpTool` with the `codegraph` server. Primary tool is `codegraph_explore` (read the tool descriptor first; pass `projectPath` when the session has no default index). After CLI upgrade, additional tools may appear — prefer whatever the live descriptors list.
 3. Ensure the project index exists (`.codegraph/`). If queries fail because the index is missing or stale, run `codegraph init` or `codegraph sync` in the repo root, then retry MCP.
 4. Fall back to `Grep` / `Read` only if CodeGraph MCP is unavailable or returns nothing useful; say briefly that MCP was unavailable when falling back.
 5. Do **not** use CodeGraph for database/table data — that belongs to the `dbx` MCP rule.

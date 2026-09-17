@@ -16,6 +16,9 @@ public class TaskResVO {
 
     private String projectId;
 
+    /** 所属项目名（我的任务列表等） */
+    private String projectName;
+
     private String taskName;
 
     private String description;

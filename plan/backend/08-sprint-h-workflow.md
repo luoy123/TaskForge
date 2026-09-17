@@ -1,9 +1,9 @@
 # Sprint H：Flowable 工作流 + 项目/任务审批联动（自学版）
 
-> **状态**：**当前焦点**（后端 A–G 已完成）  
+> **状态**：✅ **主路径已落地**（尚余 H4 收尾项，见 §0）  
 > **目标**：新建 `taskforge-workflow`，接入 Flowable；打通「发起项目/任务审批 → 待办办理 → 回写状态」；审批中禁止手改状态（对齐 pmhub `approved`）。  
 > **前置**：Sprint E–G（项目 / 任务 / 文件主路径）。  
-> **不做**：企微待办、完整表单设计器、RocketMQ、Seata、微服务拆分、前端待办页（本 Sprint 只保证 API + curl/Swagger 可验）。
+> **不做**：企微待办、完整表单设计器、RocketMQ、Seata、微服务拆分、前端待办页（本 Sprint 只保证 API + curl/Swagger 可验；UI → [frontend/05](../frontend/05-sprint-workflow-ui.md)）。
 
 ---
 
@@ -12,16 +12,32 @@
 | 阶段 | 状态 |
 |------|------|
 | Sprint A–G | ✅ |
-| **Sprint H** | **H1 骨架已落地（模块/配置/BPMN/Controller/TODO）；H2 部署已实现；H3–H5 业务留给你** |
-| 再往后 | [Sprint I 逾期 Job / 统计](./09-sprint-i-job-stats.md) → [Sprint J 系统护栏](./10-sprint-j-system-guard.md) |
+| **Sprint H** | **H1–H3 / H5 ✅；H4 大半 ✅，见下方缺口** |
+| 再往后 | [Sprint I](./09-sprint-i-job-stats.md) ✅ I1–I5a → [Sprint J](./10-sprint-j-system-guard.md) ○ |
 
 ```text
-H1  Maven：taskforge-workflow + Flowable 配置  ✅ 骨架
-H2  内置 bpmn + deployBuiltin / latestDefinition  ✅
-H3  运行时：start / todo / complete / reject     ⬜ TODO in Wf*ServiceImpl
-H4  与 project 联动：startTaskApprove + edit 禁改 ⬜ TODO
-H5  Controller + 权限字                          ✅ 入口已挂，实现依赖 H3/H4
+H1  Maven：taskforge-workflow + Flowable 配置     ✅
+H2  内置 bpmn + deployBuiltin / latestDefinition ✅
+H3  运行时：start / todo / finished / complete / reject  ✅
+H4  与 project 联动                              ⚠ 大半有，见缺口
+H5  Controller + 权限字                          ✅（挂在 /workflow/*）
 ```
+
+**代码落位（对照仓库）：**
+
+| 能力 | 位置 | 现状 |
+|------|------|------|
+| 模块 / `FlowableConfig` | `taskforge-workflow` | ✅ |
+| 内置 BPMN 部署 | `WfProcessServiceImpl#deployBuiltinTaskApprove` + `resources/bpmn/task-approve.bpmn20.xml` | ✅ |
+| start / todo / finished | `WfProcessServiceImpl` + `WfProcessController` | ✅ |
+| complete / reject / startFirstTask | `WfTaskServiceImpl` + `WfTaskController` | ✅ |
+| `startTaskApprove` / `startProjectApprove` | 启流 + 写 `pmhub_project_task_process`（`approved=0`） | ✅ |
+| 任务 `edit` 审批中禁改状态 | `ProjectTaskServiceImpl#edit` + `selectApproved` | ✅ |
+| complete/reject 回写 `approved` | complete→`"1"`；reject→`"2"` 并清 instance | ✅ |
+| 分类 / 模型 CRUD | — | ○ 计划已砍（MVP 不写） |
+| **项目** `edit` 审批中禁改 | `ProjectServiceImpl` | ⬜ 未做 |
+| 启流前校验任务/项目存在 | `start*Approve` | ⬜ MVP 跳过（注释写明） |
+| 通过/驳回回写业务 **status** | 任务/项目实体状态字段 | ⬜ 只动关联表 `approved`，未改业务状态 |
 
 对照习惯：左边 pmhub，右边 TaskForge；返回继续 `R<T>`。  
 编译：`mvn -pl taskforge-admin -am -DskipTests compile`
@@ -105,8 +121,8 @@ taskforge-workflow/
 
 ### 验收
 
-- [ ] 启动 admin 无报错，库中出现 Flowable 表（或确认已有）
-- [ ] `mvn -pl taskforge-admin -am -DskipTests compile` 通过
+- [x] 启动 admin 无报错，库中出现 Flowable 表（或确认已有）
+- [x] `mvn -pl taskforge-admin -am -DskipTests compile` 通过
 
 ---
 
@@ -114,48 +130,50 @@ taskforge-workflow/
 
 对照 pmhub：`WfCategory` / `WfModel` / `WfDeploy`（不必一次抄全字段）。
 
-| API（建议前缀） | 能力 |
-|-----------------|------|
-| `/workflow/category/*` | 分类 CRUD |
-| `/workflow/model/*` | 模型列表 / 保存 / 部署 |
-| `/workflow/deploy/*` | 部署列表 / 激活暂停（可后置） |
+| API（建议前缀） | 能力 | 现状 |
+|-----------------|------|------|
+| `/workflow/category/*` | 分类 CRUD | ○ 已砍 |
+| `/workflow/model/*` | 模型列表 / 保存 / 部署 | ○ 已砍 |
+| `/workflow/process/deployBuiltin` | 部署内置 BPMN | ✅ |
+| `/workflow/process/definition/{key}` | 查最新定义 | ✅ |
 
-**MVP 可砍法**：先不写可视化建模，仓库放 `resources/bpmn/task-approve.bpmn20.xml`，启动时或管理接口「部署内置定义」。
+**MVP 已采用**：仓库放 `resources/bpmn/task-approve.bpmn20.xml`，管理接口「部署内置定义」。
 
 ### 验收
 
-- [ ] 能部署至少 1 个流程定义，`repositoryService` 能查到
-- [ ] 分类或模型有一条可查数据（若做了 CRUD）
+- [x] 能部署至少 1 个流程定义，`repositoryService` 能查到
+- [ ] 分类或模型有一条可查数据（若做了 CRUD）— **不做**
 
 ---
 
 ## 4. H3 — 启动实例 + 待办办理
 
-| API | 能力 |
-|-----|------|
-| 待办列表 | 当前用户 `taskService` 查询 |
-| 已办列表 | historic 查询（可简化） |
-| complete | 通过并带可选 comment |
-| reject | 驳回（对齐 pmhub 策略：结束或回退，本 Sprint 选一种写清） |
+| API | 能力 | 现状 |
+|-----|------|------|
+| `GET .../todoList` | 当前用户待办 | ✅ |
+| `GET .../finishedList` | 已办（可简化） | ✅ |
+| `POST .../complete` | 通过 | ✅ |
+| `POST .../reject` | 驳回：结束实例 + `approved=2` | ✅ |
+| `POST .../start` | 按 key 纯 Flowable 启流 | ✅ |
 
-assignee / candidate：先用 **固定登录用户 id 字符串**，角色候选人可后置。
+assignee：用 **登录用户 id 字符串**；BPMN 变量 `approver` 指定审批人。
 
 ### 验收（curl）
 
-- [ ] 用 Token A 启动实例后，A（或指定办理人）待办列表有数据
-- [ ] complete 后待办消失，业务回调可先打日志
+- [x] 代码路径具备：启流后指定办理人待办有数据
+- [x] complete 后待办消失；关联表 `approved` 回写（业务 status 回写见 H4 缺口）
 
 ---
 
 ## 5. H4 — 与 project 联动（本 Sprint 核心）
 
-### 必须做
+### 必须做（对照代码）
 
-1. 实体/Mapper：`ProjectTaskProcess`（或等价）映射关联表  
-2. `startTaskApprove(taskId)`：校验任务 → 启流 → 写关联 → `approved=0`（或项目侧等价字段）  
-3. `startProjectApprove(projectId)`：同上（可与任务共用一套 process 类型字段）  
-4. `edit` 任务/项目状态：若在审则拒绝（抛业务异常，返回 `R` 失败码）  
-5. 审批通过回调：更新任务/项目状态 + `approved` 放开；驳回：按选定策略恢复
+1. ✅ 实体/Mapper：`WfTaskProcess` → `pmhub_project_task_process`
+2. ✅ `startTaskApprove(taskId, approver)`：启流 → 写关联 → `approved=0`（**未**校验任务实体存在）
+3. ✅ `startProjectApprove(projectId, approver)`：同构，`type=project`
+4. ⚠ `edit`：任务改状态时若 `approved=0` 拒绝 ✅；**项目**侧未做 ⬜
+5. ⚠ 审批通过/驳回：只更新关联表 `approved`（`1`/`2`）✅；**未**回写任务/项目业务 `status` ⬜
 
 ### 明确不做（H4）
 
@@ -164,9 +182,17 @@ assignee / candidate：先用 **固定登录用户 id 字符串**，角色候选
 
 ### 验收
 
-- [ ] 任务启动审批后，直接 `edit` 改状态失败  
-- [ ] complete 通过后状态按约定更新，并可再编辑  
-- [ ] 关联表能查到 `processInstanceId` ↔ `taskId`/`projectId`
+- [x] 任务启动审批后，直接 `edit` 改状态失败  
+- [ ] complete 通过后**业务状态**按约定更新，并可再编辑（目前仅 `approved` 放开，业务 status 未自动改）  
+- [x] 关联表能查到 `instanceId` ↔ `extraId`（task/project）
+
+### H4 收尾建议（若继续补）
+
+```text
+1. ProjectServiceImpl.edit：改 status 时查 selectApproved(projectId, "project")
+2. complete / reject 末尾：按 type 更新 ProjectTask / Project 的 status（约定写死一种即可）
+3. （可选）start*Approve 前校验业务实体存在（需 admin 编排或薄查询接口，避免 project↔workflow 环）
+```
 
 ---
 
@@ -175,27 +201,25 @@ assignee / candidate：先用 **固定登录用户 id 字符串**，角色候选
 ```text
 taskforge-admin/
   web/controller/workflow/
-    WfProcessController.java      # 待办/已办/complete/reject
-    WfModelController.java        # 可选
-    WfCategoryController.java     # 可选
-  # 在 ProjectController / ProjectTaskController 增加：
-  #   POST /project/startProjectApprove
-  #   POST /project/task/startTaskApprove
+    WfProcessController.java   # deployBuiltin / definition / start / todo / finished  ✅
+    WfTaskController.java      # complete / reject / startTaskApprove / startProjectApprove  ✅
+  # 实际入口在 /workflow/*，未挂到 ProjectController / ProjectTaskController（可接受）
 ```
 
-权限字示例（与菜单可后补）：`workflow:process:list`、`project:task:approve`。  
-`@PreAuthorize` 与 `@Log` 按现有习惯挂上。
+权限字：`workflow:process:list|deploy|start`、`workflow:task:complete|reject`、`project:task:approve`、`project:manage:approve` 等（见 `PermissionConstants`）。  
+`@PreAuthorize` 与 `@Log` 已按现有习惯挂上。
 
 ---
 
 ## 7. 验收总清单
 
-- [ ] H1 模块可编译、可启动  
-- [ ] H2 至少 1 个流程定义可用  
-- [ ] H3 待办 complete / reject 闭环  
-- [ ] H4 任务（建议先做）审批中禁改状态，通过后恢复  
-- [ ] 项目审批可与任务同构，做完任务再补项目  
-- [ ] 两个 Token：办理人能办、无关用户待办为空  
+- [x] H1 模块可编译、可启动  
+- [x] H2 至少 1 个流程定义可用  
+- [x] H3 待办 complete / reject 闭环（Flowable + approved 回写）  
+- [x] H4 任务审批中禁改状态；通过/驳回后 `approved` 放开  
+- [ ] H4 收尾：项目禁改 + 业务 status 回写（可选加强）  
+- [x] 项目审批启流与任务同构（`startProjectApprove` 已有）  
+- [ ] 两个 Token：办理人能办、无关用户待办为空（联调时再勾）  
 
 ---
 
