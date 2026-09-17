@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://taskforge.zhq.com/bpmn">
+
+  <!-- process id / key = task_approve，与 WfProcessServiceImpl.TASK_APPROVE_KEY 一致 -->
+  <process id="task_approve" name="任务审批" isExecutable="true">
+    <startEvent id="startEvent" name="开始"/>
+    <userTask id="submitTask" name="提交申请" flowable:assignee="${initiator}"/>
+    <userTask id="approveTask" name="审批" flowable:assignee="${approver}"/>
+    <endEvent id="endEvent" name="结束"/>
+
+    <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="submitTask"/>
+    <sequenceFlow id="flow2" sourceRef="submitTask" targetRef="approveTask"/>
+    <sequenceFlow id="flow3" sourceRef="approveTask" targetRef="endEvent"/>
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_task_approve">
+    <bpmndi:BPMNPlane id="BPMNPlane_task_approve" bpmnElement="task_approve">
+      <bpmndi:BPMNShape id="shape_start" bpmnElement="startEvent">
+        <omgdc:Bounds x="100" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_submit" bpmnElement="submitTask">
+        <omgdc:Bounds x="200" y="78" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_approve" bpmnElement="approveTask">
+        <omgdc:Bounds x="360" y="78" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="shape_end" bpmnElement="endEvent">
+        <omgdc:Bounds x="520" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="edge1" bpmnElement="flow1">
+        <omgdi:waypoint x="136" y="118"/>
+        <omgdi:waypoint x="200" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge2" bpmnElement="flow2">
+        <omgdi:waypoint x="300" y="118"/>
+        <omgdi:waypoint x="360" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="edge3" bpmnElement="flow3">
+        <omgdi:waypoint x="460" y="118"/>
+        <omgdi:waypoint x="520" y="118"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

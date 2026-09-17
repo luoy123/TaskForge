@@ -1,7 +1,10 @@
 package com.zhq.taskforge.project.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +25,14 @@ import com.zhq.taskforge.project.domain.ProjectLog;
 import com.zhq.taskforge.project.domain.ProjectMember;
 import com.zhq.taskforge.project.domain.ProjectStage;
 import com.zhq.taskforge.project.domain.ProjectTask;
+import com.zhq.taskforge.project.domain.vo.ProjectStatisticsResVO;
+import com.zhq.taskforge.project.domain.vo.ProjectVO;
+import com.zhq.taskforge.project.domain.vo.task.BurnDownChartVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExcelVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExportVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskReqVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskResVO;
+import com.zhq.taskforge.project.domain.vo.task.TaskStatusStatsVO;
 import com.zhq.taskforge.project.mapper.ProjectLogMapper;
 import com.zhq.taskforge.project.mapper.ProjectMapper;
 import com.zhq.taskforge.project.mapper.ProjectMemberMapper;
@@ -192,6 +199,11 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
             task.setTaskPriority(req.getTaskPriority());
         }
         if (req.getStatus() != null) {
+            // 审批中禁止手改状态（与 workflow 模块查同表，不依赖 workflow）
+            String approved = projectTaskMapper.selectApproved(req.getTaskId(), "task");
+            if ("0".equals(approved)) {
+                throw new ServiceException("该任务需要审批，任务状态不允许手动修改");
+            }
             task.setStatus(req.getStatus());
         }
         if (req.getExecuteStatus() != null) {
@@ -424,5 +436,152 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
         // 3. return "成功 " + ok + " 条，跳过 " + skip + " 条";
         // 注意：单行失败用 continue，不要让整批因一行炸；查不到用户/项目用 continue
         return "成功 " + ok + " 条，跳过 " + skip + " 条";
+    }
+
+    @Override
+    public IPage<TaskResVO> queryMyTaskList(TaskReqVO req) {
+        long pageNum = req.getPageNum() == null ? 1L : req.getPageNum();
+        long pageSize = req.getPageSize() == null ? 10L : req.getPageSize();
+        Page<TaskResVO> page = new Page<TaskResVO>(pageNum, pageSize);
+        int type = req.getType() == null ? 1 : req.getType();
+
+        IPage<TaskResVO> result;
+        if (type == 3) {
+            result = projectTaskMapper.queryMyCreatedTaskList(page, req.getProjectId(), SecurityUtils.getUsername());
+        } else if (type == 1) {
+            result = projectTaskMapper.queryMyExecutedTaskList(page, req.getProjectId(), SecurityUtils.getUserId());
+        } else {
+            throw new ServiceException("不支持的任务列表类型：" + type);
+        }
+
+        // sql中存放的是字符1234等，但是通常前端需要展示文字，所以需要手动添加。
+        for (TaskResVO vo : result.getRecords()) {
+            vo.setStatusName(ProjectTaskStatusEnum.getStatusNameByStatus(vo.getStatus()));
+        }
+        return result;
+
+    }
+
+    @Override
+    public TaskStatusStatsVO queryTaskStatusStats(String projectId) {
+        if (projectId == null || projectId.isBlank()) {
+            throw new ServiceException("项目ID不能为空");
+        }
+        LambdaQueryWrapper<ProjectTask> qw = new LambdaQueryWrapper<ProjectTask>();
+        qw.eq(ProjectTask::getProjectId, projectId).eq(ProjectTask::getDeleted, 0);
+        List<ProjectTask> list = projectTaskMapper.selectList(qw);
+
+        // 2.构造TaskStatusStatsVo对象
+        TaskStatusStatsVO vo = new TaskStatusStatsVO();
+        if (list == null || list.isEmpty()) {
+            vo.setTotal(0);
+            vo.setToBeAssign(0);
+            vo.setUnDone(0);
+            vo.setDone(0);
+            vo.setOverdue(0);
+            vo.setExpireToday(0);
+            vo.setTimeUndetermined(0);
+            return vo;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
+        Integer finished = ProjectTaskStatusEnum.FINISHED.getStatus();
+
+        vo.setTotal(list.size());
+        // 还没有执行人的任务数量
+        vo.setToBeAssign((int) list.stream().filter(task -> task.getUserId() == null).count());
+        vo.setDone((int) list.stream().filter(task -> finished.equals(task.getStatus())).count());
+        vo.setUnDone(vo.getTotal() - vo.getDone());
+        vo.setOverdue((int) list.stream().filter(
+                task -> task.getCloseTime() != null && task.getCloseTime().isBefore(now)
+                        && !finished.equals(task.getStatus()))
+                .count());
+        vo.setExpireToday((int) list.stream().filter(
+                task -> task.getCloseTime() != null && task.getCloseTime().toLocalDate().equals(today)).count());
+        vo.setTimeUndetermined((int) list.stream().filter(
+                task -> task.getEndTime() == null).count());
+        return vo;
+    }
+
+    @Override
+    public List<BurnDownChartVO> burnDownChart(String projectId) {
+        if (projectId == null || projectId.isBlank()) {
+            throw new ServiceException("项目ID不能为空");
+        }
+        LambdaQueryWrapper<ProjectTask> qw = new LambdaQueryWrapper<ProjectTask>();
+        qw.eq(ProjectTask::getProjectId, projectId)
+                .eq(ProjectTask::getDeleted, 0);
+        List<ProjectTask> taskList = projectTaskMapper.selectList(qw);
+        // 2.没有任务则返回空数组
+        if (taskList == null || taskList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Integer finished = ProjectTaskStatusEnum.FINISHED.getStatus();
+        ArrayList<BurnDownChartVO> out = new ArrayList<BurnDownChartVO>();
+        LocalDate today = LocalDate.now();
+        for (int i = 6; i >= 0; i--) {
+            LocalDate d = today.minusDays(i);
+            BurnDownChartVO burnDownChartVO = new BurnDownChartVO();
+            burnDownChartVO.setDate(d.toString());
+            burnDownChartVO.setTaskNum(taskList.size());
+            burnDownChartVO.setUnDoneTaskNum((int) taskList.stream()
+                    .filter(task -> !finished.equals(task.getStatus()))
+                    .count());
+            out.add(burnDownChartVO);
+        }
+        return out;
+    }
+
+    @Override
+    public ProjectStatisticsResVO statistics() {
+        ProjectStatisticsResVO vo = new ProjectStatisticsResVO();
+
+        LambdaQueryWrapper<Project> pq = new LambdaQueryWrapper<Project>();
+        pq.eq(Project::getDeleted, 0);
+        vo.setProjectNum(projectMapper.selectCount(pq));
+
+        LambdaQueryWrapper<ProjectTask> tq = new LambdaQueryWrapper<ProjectTask>();
+        tq.eq(ProjectTask::getDeleted, 0);
+        vo.setTaskNum(projectTaskMapper.selectCount(tq));
+
+        LocalDateTime start = LocalDate.now().atStartOfDay();// 今天的00：00：00
+        LocalDateTime end = start.plusDays(1);
+        LambdaQueryWrapper<ProjectTask> today = new LambdaQueryWrapper<ProjectTask>();
+        today.eq(ProjectTask::getDeleted, 0)
+                .ge(ProjectTask::getBeginTime, start)
+                .lt(ProjectTask::getBeginTime, end);
+        vo.setTodayTaskNum(projectTaskMapper.selectCount(today));
+
+        LambdaQueryWrapper<ProjectTask> overdue = new LambdaQueryWrapper<ProjectTask>();
+        overdue.eq(ProjectTask::getDeleted, 0)
+                .lt(ProjectTask::getCloseTime, LocalDateTime.now())
+                .ne(ProjectTask::getStatus, ProjectTaskStatusEnum.FINISHED.getStatus());
+        vo.setOverdueTaskNum(projectTaskMapper.selectCount(overdue));
+
+        return vo;
+    }
+
+    @Override
+    public List<ProjectVO> queryDoingProject() {
+        List<ProjectVO> list = projectTaskMapper.selectDoingProjectList(SecurityUtils.getUserId());
+        if (list == null) {
+            return Collections.emptyList();
+        }
+        for (ProjectVO vo : list) {
+            vo.setStatusName(ProjectStatusEnum.getStatusNameByStatus(vo.getStatus()));
+        }
+        return list;
+    }
+
+    @Override
+    public List<ProjectVO> queryMyProjectOptions() {
+        List<ProjectVO> list = projectTaskMapper.selectMyProjectOptions(SecurityUtils.getUserId());
+        if (list == null) {
+            return Collections.emptyList();
+        }
+        for (ProjectVO vo : list) {
+            vo.setStatusName(ProjectStatusEnum.getStatusNameByStatus(vo.getStatus()));
+        }
+        return list;
     }
 }

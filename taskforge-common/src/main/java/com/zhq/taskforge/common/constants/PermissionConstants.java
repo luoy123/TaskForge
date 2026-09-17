@@ -92,7 +92,7 @@ public class PermissionConstants {
     public static final String NOTICE_ADD = "system:notice:add";
     public static final String NOTICE_EDIT = "system:notice:edit";
     public static final String NOTICE_REMOVE = "system:notice:remove";
-    
+
     /**
      * 项目模块
      */
@@ -108,6 +108,10 @@ public class PermissionConstants {
     public static final String PROJECT_QUIT = "project:manage:quit";
     public static final String PROJECT_COLLECT = "project:manage:collect";
     public static final String PROJECT_CANCEL_COLLECT = "project:manage:cancelCollect";
+    /** I4：首页统计 / 进行中 / 下拉（对齐 sys_menu） */
+    public static final String PROJECT_STATISTICS = "project:manage:statistics";
+    public static final String PROJECT_DOING = "project:manage:doing";
+    public static final String PROJECT_SELECT = "project:manage:select";
 
     /**
      * 任务模块（对齐 sys_menu perms）
@@ -121,6 +125,10 @@ public class PermissionConstants {
     public static final String PROJECT_TASK_ADD_COMMENT = "project:task:addComment";
     public static final String PROJECT_TASK_LOG_LIST = "project:task:logList";
     public static final String PROJECT_TASK_IMPORT = "project:task:import";
+    /** I3：我的任务 / 概况 / 燃尽（对齐 sys_menu；burnDown 菜单可后补） */
+    public static final String PROJECT_TASK_MY_LIST = "project:task:queryMyTaskList";
+    public static final String PROJECT_TASK_SITUATION = "project:task:situation";
+    public static final String PROJECT_TASK_BURNDOWN = "project:task:burnDownChart";
 
     /**
      * 项目文件（对齐 sys_menu perms）
@@ -129,4 +137,28 @@ public class PermissionConstants {
     public static final String PROJECT_FILE_LIST = "project:file:queryFileList";
     public static final String PROJECT_FILE_RENAME = "project:file:rename";
     public static final String PROJECT_FILE_DELETE = "project:file:delete";
+
+    /**
+     * 工作流（Sprint H；菜单可后补，先保证权限字常量存在）
+     */
+    public static final String WORKFLOW_PROCESS_LIST = "workflow:process:list";
+    public static final String WORKFLOW_PROCESS_DEPLOY = "workflow:process:deploy";
+    public static final String WORKFLOW_PROCESS_START = "workflow:process:start";
+    public static final String WORKFLOW_TASK_COMPLETE = "workflow:task:complete";
+    public static final String WORKFLOW_TASK_REJECT = "workflow:task:reject";
+    public static final String PROJECT_TASK_APPROVE = "project:task:approve";
+    public static final String PROJECT_APPROVE = "project:manage:approve";
+
+    /**
+     * 项目成员（对齐 sys_menu / pmhub perms）
+     */
+    public static final String PROJECT_MEMBER_LIST = "project:member:list";
+    public static final String PROJECT_MEMBER_ADD = "project:member:inviteMemberList";
+    public static final String PROJECT_MEMBER_REMOVE = "project:member:removeMemberList";
+
+    /**
+     * 定时任务（I5a 最小 run；完整 CRUD 留给 I5b）
+     */
+    public static final String MONITOR_JOB_RUN = "monitor:job:changeStatus";
 }
+

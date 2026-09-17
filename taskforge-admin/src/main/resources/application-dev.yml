@@ -7,10 +7,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 2004
-    url: jdbc:mysql://localhost:3306/laigeoffer-pmhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    # MySQL / Redis 在开发机虚拟机上（本机无本地 3306）
+    url: jdbc:mysql://192.168.5.16:3306/laigeoffer-pmhub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
   data:
     redis:
-      host: localhost
+      host: 192.168.5.16
       port: 6379
       password: 2004
       database: 0
@@ -33,6 +34,13 @@ token:
   secret: my-very-long-and-random-secret-key-2026
   expireTime: 30
 
-# 文件上传根目录
+# 文件上传根目录（Windows 本机；勿用虚拟机 Linux 路径）
 taskforge:
-  profile: /home/zxb/data/taskforge/uploadPath
+  profile: E:/TaskForge/data/uploadPath
+
+# Flowable（对照 pmhub-admin application.yml；生产勿盲目开 schema-update）
+flowable:
+  async-executor-activate: false
+  database-schema-update: true
+  idm:
+    enabled: false

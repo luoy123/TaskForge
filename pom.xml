@@ -23,6 +23,7 @@
         <module>taskforge-framework</module>
         <module>taskforge-system</module>
         <module>taskforge-project</module>
+        <module>taskforge-workflow</module>
         <module>taskforge-admin</module>
     </modules>
 
@@ -33,6 +34,8 @@
         <hutool.version>5.7.22</hutool.version>
         <easyexcel.version>3.3.2</easyexcel.version>
         <fastjson.version>2.0.16</fastjson.version>
+        <!-- Boot 3.3 需 Flowable 7.x；勿抄 pmhub 的 6.7.2 -->
+        <flowable.version>7.1.0</flowable.version>
     </properties>
 
     <dependencyManagement>
@@ -76,6 +79,16 @@
                 <groupId>com.zhq</groupId>
                 <artifactId>taskforge-project</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zhq</groupId>
+                <artifactId>taskforge-workflow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-spring-boot-starter-process</artifactId>
+                <version>${flowable.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>

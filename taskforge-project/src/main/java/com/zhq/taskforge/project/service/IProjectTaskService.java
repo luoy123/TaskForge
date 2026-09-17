@@ -4,10 +4,14 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zhq.taskforge.project.domain.ProjectLog;
+import com.zhq.taskforge.project.domain.vo.ProjectStatisticsResVO;
+import com.zhq.taskforge.project.domain.vo.ProjectVO;
+import com.zhq.taskforge.project.domain.vo.task.BurnDownChartVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExcelVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExportVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskReqVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskResVO;
+import com.zhq.taskforge.project.domain.vo.task.TaskStatusStatsVO;
 
 /**
  * 项目任务（Sprint F / G4）。
@@ -40,4 +44,19 @@ public interface IProjectTaskService {
 
     /** 导入任务（G4）；返回如「成功 x 条，跳过 y 条」 */
     String importTask(List<TaskExcelVO> rows);
+
+    IPage<TaskResVO> queryMyTaskList(TaskReqVO req);
+
+    TaskStatusStatsVO queryTaskStatusStats(String projectId);
+
+    List<BurnDownChartVO> burnDownChart(String projectId);
+
+    ProjectStatisticsResVO statistics();
+
+    /** I4：进行中的项目 */
+    List<ProjectVO> queryDoingProject();
+
+    /** I4：下拉用——我参与的项目 */
+    List<ProjectVO> queryMyProjectOptions();
+
 }

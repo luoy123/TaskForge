@@ -5,7 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan({"com.zhq.taskforge.system.mapper", "com.zhq.taskforge.project.mapper"})
+@MapperScan({
+        "com.zhq.taskforge.system.mapper",
+        "com.zhq.taskforge.project.mapper",
+        "com.zhq.taskforge.workflow.mapper"
+})
 public class TaskForgeApplication {
 
     public static void main(String[] args) {

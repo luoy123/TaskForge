@@ -171,12 +171,12 @@ Flowable：自动建表、异步 Job 默认关、IDM 关。
 ✅ Sprint E  项目模块第一刀 → [05-sprint-e-project.md](./05-sprint-e-project.md)
 ✅ Sprint F  任务 CRUD + 子任务 + 评论 → [06-sprint-f-task.md](./06-sprint-f-task.md)
 ✅ Sprint G  文件上传工厂 + 导入导出 → [07-sprint-g-file.md](./07-sprint-g-file.md)
-→ 前端 Sprint 01：[01-sprint-h-ui.md](../frontend/01-sprint-h-ui.md)
-── 系统收尾（可选，随时可插）──
-   验证码 / 在线用户 / 服务监控（按需拆）
-── 再往后 ──
-   H  （可选）Flowable 审批联动
-   I  （可选）逾期 Job / 看板统计加深
+▶ Sprint H  Flowable 审批联动 → [08-sprint-h-workflow.md](./08-sprint-h-workflow.md)
+○ Sprint I  查询工厂 / 成员 / 统计 / 逾期 Job → [09-sprint-i-job-stats.md](./09-sprint-i-job-stats.md)
+○ Sprint J  验证码 / 在线用户 / 限流 / 防重 → [10-sprint-j-system-guard.md](./10-sprint-j-system-guard.md)
+── 后置 ──
+   OA 企微 / generator / 动态数据源 / WebSocket
+后端总览 → [01-backend-roadmap.md](./01-backend-roadmap.md)
 ```
 
 出计划时固定习惯：
