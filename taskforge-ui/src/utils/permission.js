@@ -11,6 +11,8 @@ export const COMPONENT_ALIAS = {
   'pmhub-project/my-collection': 'project/list/index',
   'pmhub-project/recycle-bin': 'project/list/index',
   'pmhub-project/my-task': 'project/my-task/index',
+  'workflow/work/todo': 'workflow/todo/index',
+  'workflow/work/finished': 'workflow/finished/index',
 }
 
 /** 同一 list 页按菜单 component 定默认 Tab */

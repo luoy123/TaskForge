@@ -44,7 +44,7 @@
       <el-table-column prop="stageName" label="阶段" width="120" />
       <el-table-column prop="nickName" label="负责人" width="120" />
       <el-table-column prop="createdTime" label="创建时间" width="180" />
-      <el-table-column label="操作" width="480" fixed="right">
+      <el-table-column label="操作" width="520" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="goTasks(row)">任务</el-button>
           <el-button
@@ -79,6 +79,13 @@
             type="info"
             @click="handleCancelCollect(row)"
           >取消收藏</el-button>
+          <el-button
+            v-if="query.type !== 'recycle'"
+            v-hasPermi="'project:manage:approve'"
+            link
+            type="success"
+            @click="openApprove(row)"
+          >发起审批</el-button>
           <el-button
             v-if="query.type !== 'recycle'"
             v-hasPermi="'project:manage:archive'"
@@ -145,6 +152,12 @@
       :biz-id="activeProjectId"
       file-type="project"
     />
+    <ApproveStartDialog
+      v-model="approveVisible"
+      kind="project"
+      :biz-id="approveBizId"
+      :biz-label="approveBizLabel"
+    />
   </div>
 </template>
 
@@ -163,6 +176,7 @@ import {
 } from '@/api/project/project'
 import FilePanel from '@/components/project/FilePanel.vue'
 import MemberDrawer from '@/components/project/MemberDrawer.vue'
+import ApproveStartDialog from '@/components/workflow/ApproveStartDialog.vue'
 import { PROJECT_LIST_TYPE_BY_COMPONENT } from '@/utils/permission'
 
 const route = useRoute()
@@ -185,6 +199,9 @@ const memberVisible = ref(false)
 const fileVisible = ref(false)
 const activeProjectId = ref('')
 const activeProjectName = ref('')
+const approveVisible = ref(false)
+const approveBizId = ref('')
+const approveBizLabel = ref('')
 
 const query = reactive({
   pageNum: 1,
@@ -259,6 +276,12 @@ function openMembers(row) {
 function openFiles(row) {
   activeProjectId.value = row.projectId
   fileVisible.value = true
+}
+
+function openApprove(row) {
+  approveBizId.value = row.projectId
+  approveBizLabel.value = row.projectName || row.projectId
+  approveVisible.value = true
 }
 
 async function getList() {

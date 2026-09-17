@@ -49,9 +49,15 @@
         <el-table-column prop="priorityName" label="优先级" width="100" />
         <el-table-column prop="nickName" label="执行人" width="120" />
         <el-table-column prop="createdTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="操作" width="340" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button
+              v-hasPermi="'project:task:approve'"
+              link
+              type="success"
+              @click="openApprove(row)"
+            >发起审批</el-button>
             <el-button
               v-hasPermi="'project:file:queryFileList'"
               link
@@ -95,6 +101,15 @@
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" rows="3" />
         </el-form-item>
+        <el-form-item v-if="form.taskId" label="状态">
+          <el-select v-model="form.status" clearable placeholder="不改则留空" style="width: 100%">
+            <el-option label="未开始" :value="0" />
+            <el-option label="进行中" :value="1" />
+            <el-option label="已完成" :value="2" />
+            <el-option label="已逾期" :value="3" />
+          </el-select>
+          <div class="field-tip">审批中（approved=0）时改状态会被后端拒绝。</div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -108,6 +123,12 @@
       :task-id="detailTaskId"
       :project-id="projectId"
       :task-name="detailTaskName"
+    />
+    <ApproveStartDialog
+      v-model="approveVisible"
+      kind="task"
+      :biz-id="approveBizId"
+      :biz-label="approveBizLabel"
     />
   </div>
 </template>
@@ -127,6 +148,7 @@ import {
 } from '@/api/project/task'
 import FilePanel from '@/components/project/FilePanel.vue'
 import TaskDetailDrawer from '@/components/project/TaskDetailDrawer.vue'
+import ApproveStartDialog from '@/components/workflow/ApproveStartDialog.vue'
 import { saveBlobResponse } from '@/utils/download'
 
 const route = useRoute()
@@ -147,6 +169,9 @@ const activeTaskId = ref('')
 const detailVisible = ref(false)
 const detailTaskId = ref('')
 const detailTaskName = ref('')
+const approveVisible = ref(false)
+const approveBizId = ref('')
+const approveBizLabel = ref('')
 
 const query = reactive({
   pageNum: 1,
@@ -157,6 +182,7 @@ const form = reactive({
   taskId: undefined,
   taskName: '',
   description: '',
+  status: undefined,
 })
 
 const rules = {
@@ -167,6 +193,7 @@ function resetForm() {
   form.taskId = undefined
   form.taskName = ''
   form.description = ''
+  form.status = undefined
 }
 
 function openDialog(row) {
@@ -176,6 +203,7 @@ function openDialog(row) {
     form.taskId = row.taskId
     form.taskName = row.taskName
     form.description = row.description || ''
+    form.status = row.status
   } else {
     dialogTitle.value = '新增任务'
   }
@@ -191,6 +219,12 @@ function openDetail(row) {
   detailTaskId.value = row.taskId
   detailTaskName.value = row.taskName || ''
   detailVisible.value = true
+}
+
+function openApprove(row) {
+  approveBizId.value = row.taskId
+  approveBizLabel.value = row.taskName || row.taskId
+  approveVisible.value = true
 }
 
 function onSelectionChange(rows) {
@@ -222,11 +256,15 @@ async function submitForm() {
   submitLoading.value = true
   try {
     if (form.taskId) {
-      await editTask({
+      const payload = {
         taskId: form.taskId,
         taskName: form.taskName,
         description: form.description,
-      })
+      }
+      if (form.status !== undefined && form.status !== null && form.status !== '') {
+        payload.status = form.status
+      }
+      await editTask(payload)
       ElMessage.success('修改成功')
     } else {
       await addTask({
@@ -325,5 +363,11 @@ onMounted(() => {
 .pager {
   display: flex;
   justify-content: flex-end;
+}
+.field-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.4;
 }
 </style>

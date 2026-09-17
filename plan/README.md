@@ -44,7 +44,7 @@ plan/
 ```text
 ✅ 01–03  登录 / 系统 CRUD / 项目任务列表 / 动态路由
 ✅ 04      权限 + 文件 + 成员 / Excel / 我的任务 / 首页统计
-○ 05      工作流 UI（等后端 H3–H5）
+✅ 05      工作流 UI（待办 / 已办 / 发起审批）
 ○ 06      系统缺页 / 对接 J（候选）
 ```
 
@@ -54,14 +54,14 @@ plan/
 | [02-sprint-project-task.md](./frontend/02-sprint-project-task.md) | 项目列表 + 任务列表 | ✅ |
 | [03-sprint-dynamic-routes.md](./frontend/03-sprint-dynamic-routes.md) | getRouters 动态路由 | ✅ |
 | [04-sprint-file-perm-deepen.md](./frontend/04-sprint-file-perm-deepen.md) | 权限 + 文件 + 成员/统计等 | ✅ |
-| [05-sprint-workflow-ui.md](./frontend/05-sprint-workflow-ui.md) | 待办 / 审批 UI | ○ 等 H |
+| [05-sprint-workflow-ui.md](./frontend/05-sprint-workflow-ui.md) | 待办 / 审批 UI | ✅ 壳 |
 
 ## 怎么选下一刀
 
 | 你想… | 去做 |
 |------|------|
+| 联调审批闭环 | [frontend/05-sprint-workflow-ui.md](./frontend/05-sprint-workflow-ui.md) §3 |
 | 补 H4 收尾（项目禁改 / 业务 status 回写） | [backend/08-sprint-h-workflow.md](./backend/08-sprint-h-workflow.md) §5 |
-| H 联调通过后再做审批页 | [frontend/05-sprint-workflow-ui.md](./frontend/05-sprint-workflow-ui.md) |
 | 系统护栏 / 缺页 | [backend/10-sprint-j-system-guard.md](./backend/10-sprint-j-system-guard.md) 或前端 06 |
 
 ## 约定
