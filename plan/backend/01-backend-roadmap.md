@@ -18,6 +18,7 @@
 | G | 文件上传 + 任务导入导出 |
 | H | Flowable 主路径（H4 收尾可选，见 08 §0 / §5） |
 | I | 查询工厂 / 成员 / 统计 / 逾期 Job（I1–I5a） |
+| J | 验证码 / 在线用户 / 限流 / 防重（J1～J4） |
 
 模块现状：`common / framework / system / project / workflow / quartz / admin`。
 
@@ -26,18 +27,19 @@
 ## 接下来（按推荐顺序）
 
 ```text
-✅ H  Flowable 工作流 + 项目/任务审批     → 08-sprint-h-workflow.md（主路径 ✅；H4 收尾可选）
+✅ H  Flowable 工作流 + 项目/任务审批     → 08-sprint-h-workflow.md
 ✅ I  查询工厂 / 成员 / 统计 / 逾期 Job   → 09-sprint-i-job-stats.md（I1–I5a）
-○ J  验证码 / 在线用户 / 限流 / 防重     → 10-sprint-j-system-guard.md
-── 更后置 ──
-   OA 企微、代码生成 generator、动态数据源、WebSocket、I5b 定时任务管理端
+✅ J  验证码 / 在线用户 / 限流 / 防重     → 10-sprint-j-system-guard.md（J1～J4）
+── 更后置 / 前端对接 ──
+   前端 06：验证码登录 + 在线用户页
+   OA 企微、generator、动态数据源、WebSocket、I5b 定时任务管理端
 ```
 
-| 顺序 | 文档 | 为何这时做 |
-|------|------|------------|
-| — | [08-sprint-h-workflow.md](./08-sprint-h-workflow.md) | ✅ 主路径已落地；可选补项目禁改 / 业务 status 回写 |
-| — | [09-sprint-i-job-stats.md](./09-sprint-i-job-stats.md) | ✅ 已完成（I1–I5a） |
-| **1** | [10-sprint-j-system-guard.md](./10-sprint-j-system-guard.md) | 系统向护栏，可随时插队拆小块 |
+| 顺序 | 文档 | 状态 |
+|------|------|------|
+| — | [08-sprint-h-workflow.md](./08-sprint-h-workflow.md) | ✅ 主路径；H4 收尾可选 |
+| — | [09-sprint-i-job-stats.md](./09-sprint-i-job-stats.md) | ✅ I1–I5a |
+| — | [10-sprint-j-system-guard.md](./10-sprint-j-system-guard.md) | ✅ J1～J4；UI 见 `../frontend/06-sprint-captcha-online.md` |
 
 ---
 

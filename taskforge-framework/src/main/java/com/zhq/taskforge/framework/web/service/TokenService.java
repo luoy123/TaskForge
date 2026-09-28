@@ -6,12 +6,17 @@ import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTUtil;
 import cn.hutool.jwt.signers.JWTSigner;
 import cn.hutool.jwt.signers.JWTSignerUtil;
+import eu.bitwalker.useragentutils.UserAgent;
+
 import com.zhq.taskforge.common.constants.CacheConstants;
 import com.zhq.taskforge.common.constants.Constants;
 import com.zhq.taskforge.common.core.domain.model.LoginUser;
 import com.zhq.taskforge.common.core.redis.RedisCache;
 import com.zhq.taskforge.common.utils.ServletUtils;
 import com.zhq.taskforge.common.utils.StringUtils;
+import com.zhq.taskforge.common.utils.ip.AddressUtils;
+import com.zhq.taskforge.common.utils.ip.IpUtils;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,11 +59,13 @@ public class TokenService {
         if (StringUtils.isNotEmpty(token)) {
             try {
                 JWT jwt = JWTUtil.parseToken(token).setSigner(getSigner());
-                if (!jwt.verify()) return null;
+                if (!jwt.verify())
+                    return null;
                 String uuid = (String) jwt.getPayload("uuid");
                 String userKey = getTokenKey(uuid);
                 return redisCache.getCacheObject(userKey);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }
@@ -79,6 +86,7 @@ public class TokenService {
     public String createToken(LoginUser loginUser) {
         String token = IdUtil.fastUUID();
         loginUser.setToken(token);
+        setUserAgent(loginUser);
         refreshToken(loginUser);
         Map<String, Object> claims = new HashMap<>();
         claims.put("uuid", token);
@@ -123,4 +131,20 @@ public class TokenService {
     private String getTokenKey(String uuid) {
         return CacheConstants.LOGIN_TOKEN_KEY + uuid;
     }
+
+    /**
+     * 把当前请求的 IP、归属地、浏览器、OS 写入 LoginUser，
+     * 随后 refreshToken 会一并存进 Redis，在线用户列表才能展示。
+     */
+    private void setUserAgent(LoginUser user) {
+        UserAgent userAgent = UserAgent.parseUserAgentString(
+                ServletUtils.getRequest().getHeader("User-Agent"));
+
+        String ip = IpUtils.getIpAddr(ServletUtils.getRequest());
+        user.setIpaddr(ip);
+        user.setLoginLocation(AddressUtils.getRealAddressByIP(ip));
+        user.setBrowser(userAgent.getBrowser().getName());
+        user.setOs(userAgent.getOperatingSystem().getName());
+    }
+
 }

@@ -49,7 +49,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers(
                         "/doc.html", "/login", "/register",
                         "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**",
-                        "/favicon.ico").permitAll()
+                        "/favicon.ico", "/captchaImage").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();

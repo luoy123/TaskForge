@@ -14,4 +14,5 @@ public class Constants {
     public static final String GBK = "GBK";
     public static final String SUCCESS = "0";
     public static final String FAIL = "1";
+    public static final Integer CAPTCHA_EXPIRATION = 2;// 分钟有效期
 }

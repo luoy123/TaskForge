@@ -160,5 +160,11 @@ public class PermissionConstants {
      * 定时任务（I5a 最小 run；完整 CRUD 留给 I5b）
      */
     public static final String MONITOR_JOB_RUN = "monitor:job:changeStatus";
-}
 
+    /**
+     * 在线用户
+     */
+    public static final String ONLINE_LIST = "monitor:online:list";
+    public static final String ONLINE_FORCE_LOGOUT = "monitor:online:forceLogout";
+
+}

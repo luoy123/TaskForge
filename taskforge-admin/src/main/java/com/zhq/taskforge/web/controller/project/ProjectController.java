@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.zhq.taskforge.common.annotation.Log;
+import com.zhq.taskforge.common.annotation.RepeatSubmit;
 import com.zhq.taskforge.common.constants.PermissionConstants;
 import com.zhq.taskforge.common.core.domain.R;
 import com.zhq.taskforge.common.enums.BusinessType;
@@ -37,6 +38,7 @@ public class ProjectController {
     @Autowired
     private IProjectTaskService projectTaskService;
 
+    @RepeatSubmit(interval = 3000, message = "请勿重复提交项目")
     @PostMapping("/add")
     @Operation(summary = "新增项目")
     @Log(title = "项目管理", businessType = BusinessType.INSERT)

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhq.taskforge.common.annotation.Log;
+import com.zhq.taskforge.common.annotation.RepeatSubmit;
 import com.zhq.taskforge.common.constants.PermissionConstants;
 import com.zhq.taskforge.common.core.domain.R;
 import com.zhq.taskforge.common.core.domain.entity.SysUser;
@@ -71,6 +72,7 @@ public class SysUserController {
         return R.ok(byId);
     }
 
+    @RepeatSubmit(interval = 3000, message = "请勿重复提交用户")
     @PostMapping()
     @Operation(summary = "添加用户")
     @Log(title = "用户管理", businessType = BusinessType.INSERT)

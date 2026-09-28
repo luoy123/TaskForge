@@ -1,8 +1,10 @@
 package com.zhq.taskforge.web.controller.system;
 
+import com.zhq.taskforge.common.annotation.RateLimter;
 import com.zhq.taskforge.common.constants.Constants;
 import com.zhq.taskforge.common.core.domain.R;
 import com.zhq.taskforge.common.core.domain.model.LoginBody;
+import com.zhq.taskforge.common.enums.LimitType;
 import com.zhq.taskforge.framework.web.service.SysLoginService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +23,8 @@ public class AuthController {
     @Autowired
     private SysLoginService authService;
 
+    /** J3 试点：同一 IP 60 秒内最多 20 次登录（压测可临时改小 count） */
+    @RateLimter(time = 60, count = 20, limitType = LimitType.IP)
     @PostMapping("/login")
     @Operation(summary = "用户登录")
     public R<Map<String, Object>> login(@RequestBody LoginBody loginBody) {

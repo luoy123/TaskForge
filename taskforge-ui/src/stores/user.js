@@ -9,19 +9,21 @@ export const useUserStore = defineStore('user', () => {
   const roles = ref([])
   const permissions = ref([])
 
-  async function login(username, password) {
-    const { data: res } = await loginApi({ username, password })
-    // ========== 【学员填写 ②】登录成功后保存 token ==========
-    // res 是后端 R：{ code, message, data: { token: '...' } }
-    // 需要：1) 赋给 token.value   2) 写入 localStorage 键名 Admin-Token
-    // 提示：
-    //   token.value = res.data.token
-    //   localStorage.setItem('Admin-Token', token.value)
-    //
-    // 在下面写（大约 2 行）：
+  /**
+   * @param {{ username: string, password: string, code?: string, uuid?: string }} payload
+   */
+  async function login(payload) {
+    const body = {
+      username: payload.username,
+      password: payload.password,
+    }
+    if (payload.uuid) {
+      body.code = payload.code ?? ''
+      body.uuid = payload.uuid
+    }
+    const { data: res } = await loginApi(body)
     token.value = res.data.token
     localStorage.setItem('Admin-Token', token.value)
-    // ========== 填写结束 ==========
   }
 
   async function fetchUserInfo() {

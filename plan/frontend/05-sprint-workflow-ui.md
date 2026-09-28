@@ -66,4 +66,4 @@ taskforge-ui/src/
 
 - 流程定义在线部署 UI、多级会签 / 抄送  
 - 其余 workflow/* 菜单页  
-- 对接后端 J 的验证码登录页改动
+- 验证码登录 / 在线用户 → 见 [06-sprint-captcha-online.md](./06-sprint-captcha-online.md)
