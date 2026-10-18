@@ -40,6 +40,9 @@ public class SysConfigServiceImpl implements ISysConfigService {
         if(!StringUtils.isEmpty(sysConfig.getConfigName())){
             qw.like(SysConfig::getConfigName, sysConfig.getConfigName());
         }
+        if(!StringUtils.isEmpty(sysConfig.getConfigKey())){
+            qw.like(SysConfig::getConfigKey, sysConfig.getConfigKey());
+        }
         if(!StringUtils.isEmpty(sysConfig.getConfigValue())){
             qw.like(SysConfig::getConfigValue, sysConfig.getConfigValue());
         }

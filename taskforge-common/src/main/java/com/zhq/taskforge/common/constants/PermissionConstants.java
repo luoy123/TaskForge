@@ -157,9 +157,17 @@ public class PermissionConstants {
     public static final String PROJECT_MEMBER_REMOVE = "project:member:removeMemberList";
 
     /**
-     * 定时任务（I5a 最小 run；完整 CRUD 留给 I5b）
+     * 定时任务（Sprint K）
      */
-    public static final String MONITOR_JOB_RUN = "monitor:job:changeStatus";
+    public static final String MONITOR_JOB_LIST = "monitor:job:list";
+    public static final String MONITOR_JOB_QUERY = "monitor:job:query";
+    public static final String MONITOR_JOB_ADD = "monitor:job:add";
+    public static final String MONITOR_JOB_EDIT = "monitor:job:edit";
+    public static final String MONITOR_JOB_REMOVE = "monitor:job:remove";
+    /** 启停 / 立即执行 */
+    public static final String MONITOR_JOB_CHANGE_STATUS = "monitor:job:changeStatus";
+    /** @deprecated 使用 MONITOR_JOB_CHANGE_STATUS */
+    public static final String MONITOR_JOB_RUN = MONITOR_JOB_CHANGE_STATUS;
 
     /**
      * 在线用户

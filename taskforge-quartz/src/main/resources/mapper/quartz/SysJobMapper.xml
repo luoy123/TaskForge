@@ -26,6 +26,24 @@
         from sys_job
     </sql>
 
+    <select id="selectJobList" parameterType="com.zhq.taskforge.quartz.domain.SysJob" resultMap="SysJobResult">
+        <include refid="selectJobVo"/>
+        <where>
+            <if test = "jobName != null and jobName != '' ">
+                and job_name like concat('%',#{jobName},'%')
+            </if>
+            <if test = "jobGroup != null and jobGroup != ''">
+                and job_group = #{jobGroup}
+            </if> 
+            <if test = "status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test = "invokeTarget != null and invokeTarget != ''">
+                and invoke_target like concat('%',#{invokeTarget},'%')
+            </if>
+        </where>
+    </select>
+
     <select id="selectJobAll" resultMap="SysJobResult">
         <include refid="selectJobVo"/>
     </select>
@@ -34,4 +52,64 @@
         <include refid="selectJobVo"/>
         where job_id = #{jobId}
     </select>
+
+    <!-- parameterType:根据方法参数自动推断类型，这里我们手动的传递了 -->
+    <delete id="deleteJobById" parameterType="Long">
+        delete from sys_job
+        where job_id = #{jobId}
+    </delete>
+
+    <delete id="deleteByIds">
+        delete from sys_job where job_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insertJob" parameterType="com.zhq.taskforge.quartz.domain.SysJob" useGeneratedKeys="true" keyProperty="jobId">
+        insert into sys_job(
+            <if test="jobId != null and jobId != 0">job_id,</if>
+            <if test="jobName != null and jobName != ''">job_name,</if>
+            <if test="jobGroup != null and jobGroup != ''">job_group,</if>
+            <if test="invokeTarget != null and invokeTarget != ''">invoke_target,</if>
+            <if test="cronExpression != null and cronExpression != ''">cron_expression,</if>
+            <if test="misfirePolicy != null and misfirePolicy != ''">misfire_policy,</if>
+            <if test="concurrent != null and concurrent != ''">concurrent,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+            )values(
+            <if test="jobId != null and jobId != 0">#{jobId},</if>
+            <if test="jobName != null and jobName != ''">#{jobName},</if>
+            <if test="jobGroup != null and jobGroup != ''">#{jobGroup},</if>
+            <if test="invokeTarget != null and invokeTarget != ''">#{invokeTarget},</if>
+            <if test="cronExpression != null and cronExpression != ''">#{cronExpression},</if>
+            <if test="misfirePolicy != null and misfirePolicy != ''">#{misfirePolicy},</if>
+            <if test="concurrent != null and concurrent != ''">#{concurrent},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            sysdate()
+            )
+    </insert>
+
+    <update id="updateJob" parameterType="com.zhq.taskforge.quartz.domain.SysJob">
+        update sys_job
+        <set>
+            <if test="jobName != null and jobName != ''">job_name = #{jobName},</if>
+            <if test="jobGroup != null and jobGroup != ''">job_group = #{jobGroup},</if>
+            <if test="invokeTarget != null and invokeTarget != ''">invoke_target = #{invokeTarget},</if>
+            <if test="cronExpression != null and cronExpression != ''">cron_expression = #{cronExpression},</if>
+            <if test="misfirePolicy != null and misfirePolicy != ''">misfire_policy = #{misfirePolicy},</if>
+            <if test="concurrent != null and concurrent != ''">concurrent = #{concurrent},</if>
+            <if test="status !=null">status = #{status},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where job_id = #{jobId}
+    </update>
+
+
 </mapper>

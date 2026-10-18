@@ -31,7 +31,7 @@ public class SysPostServiceImpl implements ISysPostService {
         if(!StringUtils.isEmpty(sysPost.getPostName())){
             qw.like(SysPost::getPostName, sysPost.getPostName());
         }
-        if(sysPost.getStatus() != null){
+        if(StringUtils.hasText(sysPost.getStatus())){
             qw.eq(SysPost::getStatus, sysPost.getStatus());
         }
         qw.orderByAsc(SysPost::getPostId);

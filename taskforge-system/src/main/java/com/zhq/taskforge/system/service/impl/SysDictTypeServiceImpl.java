@@ -36,7 +36,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
         if(!StringUtils.isEmpty(dictType.getDictType())){
             qw.like(SysDictType::getDictType, dictType.getDictType());
         }
-        if(dictType.getStatus() != null){
+        if(StringUtils.hasText(dictType.getStatus())){
             qw.eq(SysDictType::getStatus, dictType.getStatus());
         }
 

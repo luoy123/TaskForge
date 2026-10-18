@@ -1,6 +1,6 @@
-# 后端后续路线（A–G 之后）
+# 后端后续路线（对照 pmhub-boot）
 
-> 只谈 **Java / API**。前端计划见 `plan/frontend/`，互不抢编号。  
+> 只谈 **Java / API**。前端见 `plan/frontend/`。  
 > 对照总图：[00-pmhub-reference-map.md](./00-pmhub-reference-map.md)
 
 ---
@@ -9,37 +9,36 @@
 
 | Sprint | 内容 |
 |--------|------|
-| A | 用户 CRUD |
-| B | 登录/操作日志 + monitor |
-| C | getInfo / Profile / Notice 等 |
-| D | DataScope |
-| E | 项目第一刀 |
-| F | 任务 CRUD + 子任务 + 评论 |
-| G | 文件上传 + 任务导入导出 |
-| H | Flowable 主路径（H4 收尾可选，见 08 §0 / §5） |
-| I | 查询工厂 / 成员 / 统计 / 逾期 Job（I1–I5a） |
-| J | 验证码 / 在线用户 / 限流 / 防重（J1～J4） |
+| A–G | 系统 / DataScope / 项目 / 任务 / 文件 |
+| H | Flowable 主路径（H4 收尾 → L） |
+| I | 查询工厂 / 成员 / 统计 / 逾期 Job（I5a） |
+| J | 验证码 / 在线用户 / 限流 / 防重 |
+| K | 定时任务管理端 CRUD + 日志（I5b） |
 
-模块现状：`common / framework / system / project / workflow / quartz / admin`。
+模块：`common / framework / system / project / workflow / quartz / admin`。
 
 ---
 
-## 接下来（按推荐顺序）
+## 接下来
 
 ```text
-✅ H  Flowable 工作流 + 项目/任务审批     → 08-sprint-h-workflow.md
-✅ I  查询工厂 / 成员 / 统计 / 逾期 Job   → 09-sprint-i-job-stats.md（I1–I5a）
-✅ J  验证码 / 在线用户 / 限流 / 防重     → 10-sprint-j-system-guard.md（J1～J4）
-── 更后置 / 前端对接 ──
-   前端 06：验证码登录 + 在线用户页
-   OA 企微、generator、动态数据源、WebSocket、I5b 定时任务管理端
+✅ K  定时任务管理端（I5b CRUD + 日志）     → 11-sprint-k-quartz-admin.md
+○ L  工作流打磨（H4：禁改 / status 回写） → 12-sprint-l-workflow-polish.md  ← 后端下一刀
+○ M  项目域加深（阶段 / 工时 / 动态）     → 13-sprint-m-project-deepen.md
+○ N  服务 / 缓存监控                     → 14-sprint-n-monitor-server.md
+○ O  代码生成 generator                  → 15-sprint-o-generator.md
+── 后置 ──
+   OA 企微（无企业微信可跳过）
+   动态数据源 / WebSocket
 ```
 
-| 顺序 | 文档 | 状态 |
-|------|------|------|
-| — | [08-sprint-h-workflow.md](./08-sprint-h-workflow.md) | ✅ 主路径；H4 收尾可选 |
-| — | [09-sprint-i-job-stats.md](./09-sprint-i-job-stats.md) | ✅ I1–I5a |
-| — | [10-sprint-j-system-guard.md](./10-sprint-j-system-guard.md) | ✅ J1～J4；UI 见 `../frontend/06-sprint-captcha-online.md` |
+| 顺序 | 文档 | 为何这时做 |
+|------|------|------------|
+| — | [11-sprint-k-quartz-admin.md](./11-sprint-k-quartz-admin.md) | ✅ API 已齐；前端 job 页已有 |
+| **1** | [12-sprint-l-workflow-polish.md](./12-sprint-l-workflow-polish.md) | 收掉 H4：项目在审禁改、业务 status 回写 |
+| **2** | [13-sprint-m-project-deepen.md](./13-sprint-m-project-deepen.md) | 阶段/工时/日志工厂，对齐 pmhub-project 中层 |
+| **3** | [14-sprint-n-monitor-server.md](./14-sprint-n-monitor-server.md) | 运维演示向 |
+| **4** | [15-sprint-o-generator.md](./15-sprint-o-generator.md) | 学习向，非业务阻断 |
 
 ---
 

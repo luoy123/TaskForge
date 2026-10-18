@@ -14,11 +14,13 @@ plan/
 ## 后端 `backend/`
 
 ```text
-✅ A–G   系统 / DataScope / 项目 / 任务 / 文件导入导出
-✅ H      Flowable 审批联动（主路径 ✅；H4 收尾可选）
-✅ I      查询工厂 / 成员 / 统计 / 逾期 Job（I1–I5a）
-✅ J      验证码 / 在线用户 / 限流 / 防重（J1～J4 ✅）
-后置     OA / generator / I5b 定时任务管理端 / Server 监控大盘
+✅ A–J   系统 → 项目任务文件 → Flowable → 统计逾期 → 护栏
+✅ K      定时任务管理端（API 已齐；前端 job 页已有）
+○ L      工作流打磨（H4 收尾）
+○ M      项目域加深（阶段/工时/动态）
+○ N      服务 / 缓存监控
+○ O      代码生成
+后置     OA 企微 / 动态数据源 / WebSocket
 ```
 
 总览：[backend/01-backend-roadmap.md](./backend/01-backend-roadmap.md)
@@ -26,49 +28,46 @@ plan/
 | 文档 | 内容 | 状态 |
 |------|------|------|
 | [00-pmhub-reference-map.md](./backend/00-pmhub-reference-map.md) | pmhub 对照知识图 | 活文档 |
-| [01-backend-roadmap.md](./backend/01-backend-roadmap.md) | A–G 之后后端路线 | 活文档 |
-| [02-sprint-b-monitor-logging.md](./backend/02-sprint-b-monitor-logging.md) | Sprint B 监控日志 | ✅ |
-| [03-sprint-c-system-polish.md](./backend/03-sprint-c-system-polish.md) | Sprint C 系统打磨 | ✅ |
-| [04-sprint-d-datascope.md](./backend/04-sprint-d-datascope.md) | Sprint D 数据权限 | ✅ |
-| [05-sprint-e-project.md](./backend/05-sprint-e-project.md) | Sprint E 项目 | ✅ |
-| [06-sprint-f-task.md](./backend/06-sprint-f-task.md) | Sprint F 任务 | ✅ |
-| [07-sprint-g-file.md](./backend/07-sprint-g-file.md) | Sprint G 文件 / 导入导出 | ✅ |
-| [08-sprint-h-workflow.md](./backend/08-sprint-h-workflow.md) | Sprint H Flowable | ✅ 主路径 |
-| [09-sprint-i-job-stats.md](./backend/09-sprint-i-job-stats.md) | Sprint I 统计 / 逾期 Job | ✅ I1–I5a |
-| [10-sprint-j-system-guard.md](./backend/10-sprint-j-system-guard.md) | Sprint J 系统护栏 | ✅ J1～J4 |
+| [01-backend-roadmap.md](./backend/01-backend-roadmap.md) | 后端总路线 | 活文档 |
+| [02](./backend/02-sprint-b-monitor-logging.md)～[07](./backend/07-sprint-g-file.md) | B–G | ✅ |
+| [08-sprint-h-workflow.md](./backend/08-sprint-h-workflow.md) | H Flowable | ✅ 主路径 |
+| [09-sprint-i-job-stats.md](./backend/09-sprint-i-job-stats.md) | I 统计 / 逾期 | ✅ I5a |
+| [10-sprint-j-system-guard.md](./backend/10-sprint-j-system-guard.md) | J 护栏 | ✅ |
+| [11-sprint-k-quartz-admin.md](./backend/11-sprint-k-quartz-admin.md) | K Job 管理端 | ✅ API（验收勾选可再补） |
+| [12-sprint-l-workflow-polish.md](./backend/12-sprint-l-workflow-polish.md) | L 审批打磨 | ○ |
+| [13-sprint-m-project-deepen.md](./backend/13-sprint-m-project-deepen.md) | M 项目域加深 | ○ |
+| [14-sprint-n-monitor-server.md](./backend/14-sprint-n-monitor-server.md) | N 服务/缓存监控 | ○ |
+| [15-sprint-o-generator.md](./backend/15-sprint-o-generator.md) | O 代码生成 | ○ |
 
 ## 前端 `frontend/`
 
-单独编号，不与后端抢号。
-
 ```text
-✅ 01–03  登录 / 系统 CRUD / 项目任务列表 / 动态路由
-✅ 04      权限 + 文件 + 成员 / Excel / 我的任务 / 首页统计
-✅ 05      工作流 UI 壳（待办联调可并行）
-✅ 06      验证码登录 + 在线用户（壳已落地 · 待自测）
-○ 07      系统缺页 / I5b Job 页（候选）
+✅ 01–06  登录 → 系统 CRUD → 项目任务 → 动态路由 → 文件权限 → 工作流壳 → 验证码/在线用户
+✅ K 对齐  views/monitor/job（定时任务 + 调度日志抽屉）已落地
+▶ 07      系统缺页：岗位/字典/参数/公告/登录·操作日志  ← 推荐
+○ 08      等后端 L/M/N 再开（审批打磨 / 阶段工时 / Server 监控）
 ```
 
 | 文档 | 内容 | 状态 |
 |------|------|------|
-| [01-sprint-h-ui.md](./frontend/01-sprint-h-ui.md) | UI 骨架与系统管理页 | ✅ |
-| [02-sprint-project-task.md](./frontend/02-sprint-project-task.md) | 项目列表 + 任务列表 | ✅ |
-| [03-sprint-dynamic-routes.md](./frontend/03-sprint-dynamic-routes.md) | getRouters 动态路由 | ✅ |
-| [04-sprint-file-perm-deepen.md](./frontend/04-sprint-file-perm-deepen.md) | 权限 + 文件 + 成员/统计等 | ✅ 壳 |
-| [05-sprint-workflow-ui.md](./frontend/05-sprint-workflow-ui.md) | 待办 / 审批 UI | ✅ 壳 · 联调可选 |
-| [06-sprint-captcha-online.md](./frontend/06-sprint-captcha-online.md) | 验证码 + 在线用户 | ✅ 壳 · **待自测** |
+| [01](./frontend/01-sprint-h-ui.md)～[03](./frontend/03-sprint-dynamic-routes.md) | 骨架 / 项目任务 / 动态路由 | ✅ |
+| [04-sprint-file-perm-deepen.md](./frontend/04-sprint-file-perm-deepen.md) | 权限 + 文件 + 成员/统计 | ✅ |
+| [05-sprint-workflow-ui.md](./frontend/05-sprint-workflow-ui.md) | 待办 / 审批 UI | ✅ 壳 |
+| [06-sprint-captcha-online.md](./frontend/06-sprint-captcha-online.md) | 验证码 + 在线用户 | ✅ |
+| [07-sprint-system-pages.md](./frontend/07-sprint-system-pages.md) | 系统缺页补齐 | ▶ **推荐** |
 
 ## 怎么选下一刀
 
 | 你想… | 去做 |
 |------|------|
-| 自测刚写的验证码 / 在线用户 | [frontend/06-sprint-captcha-online.md](./frontend/06-sprint-captcha-online.md) §4 |
-| 把审批从壳跑通联调 | [frontend/05-sprint-workflow-ui.md](./frontend/05-sprint-workflow-ui.md) §3 |
-| 系统缺页（岗位/字典/日志） | 开前端 07（尚未建档，需要时再说） |
+| 前端少点「建设中」 | [frontend/07-sprint-system-pages.md](./frontend/07-sprint-system-pages.md) |
+| 继续啃后端审批打磨 | [backend/12-sprint-l-workflow-polish.md](./backend/12-sprint-l-workflow-polish.md) |
+| 后端项目域加深 | [backend/13-sprint-m-project-deepen.md](./backend/13-sprint-m-project-deepen.md) |
+| 定时任务联调冒烟 | 已有 `views/monitor/job` + `/monitor/job*` |
 
 ## 约定
 
-- **新后端计划** → `plan/backend/`，后端内编号延续
-- **新前端计划** → `plan/frontend/`，前端内从 `01-` 自增
-- 跨端引用写相对路径
-- 不要把计划写到仓库根或其它 docs 目录
+- **新后端计划** → `plan/backend/`，编号延续  
+- **新前端计划** → `plan/frontend/`，从 `01-` 自增  
+- 跨端引用写相对路径  
+- 不要把计划写到仓库根或其它 docs 目录  

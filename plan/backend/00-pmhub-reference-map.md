@@ -146,8 +146,8 @@ Flowable：自动建表、异步 Job 默认关、IDM 关。
 |------|----------|-----------|
 | 操作日志 | @Log + LogAspect + AsyncFactory | ✅ |
 | 数据权限 | @DataScope + DataScopeAspect | ⏳ D（注解+Context 已有，缺 Aspect 接线） |
-| 限流 | @RateLimiter + RateLimiterAspect | 后置 |
-| 防重提交 | @RepeatSubmit + Interceptor | 后置 |
+| 限流 | @RateLimiter + RateLimiterAspect | ✅ J（注解名现为 RateLimter） |
+| 防重提交 | @RepeatSubmit + Interceptor | ✅ J |
 | 动态数据源 | @DataSource + DataSourceAspect | 通常不做 |
 | WebSocket | WebSocketServer | 后置 |
 
@@ -156,26 +156,25 @@ Flowable：自动建表、异步 Job 默认关、IDM 关。
 ## 7. OA / Quartz / Generator（计划优先级低）
 
 - **oa**：企微消息模板、回调、任务逾期推送；无企微可砍或 mock。
-- **quartz**：sys_job + 任务逾期 Job（TaskOverdue*Job 在 project 模块）。
-- **generator**：Velocity CRUD；非 MVP。
+- **quartz**：I5a ✅；管理端 CRUD/日志 → Sprint K。
+- **generator**：Velocity CRUD → Sprint O；非 MVP。
 
 ---
 
 ## 8. 推荐 TaskForge 路线（出计划时按此切 Sprint）
 
 ```
-✅ Sprint A  用户 CRUD
-✅ Sprint B  登录/操作日志 + monitor
-✅ Sprint C  getInfo / Profile / Notice
-✅ Sprint D  DataScope
-✅ Sprint E  项目模块第一刀 → [05-sprint-e-project.md](./05-sprint-e-project.md)
-✅ Sprint F  任务 CRUD + 子任务 + 评论 → [06-sprint-f-task.md](./06-sprint-f-task.md)
-✅ Sprint G  文件上传工厂 + 导入导出 → [07-sprint-g-file.md](./07-sprint-g-file.md)
-▶ Sprint H  Flowable 审批联动 → [08-sprint-h-workflow.md](./08-sprint-h-workflow.md)
-○ Sprint I  查询工厂 / 成员 / 统计 / 逾期 Job → [09-sprint-i-job-stats.md](./09-sprint-i-job-stats.md)
-○ Sprint J  验证码 / 在线用户 / 限流 / 防重 → [10-sprint-j-system-guard.md](./10-sprint-j-system-guard.md)
+✅ Sprint A–G  系统 → 项目 / 任务 / 文件
+✅ Sprint H  Flowable 主路径 → [08-sprint-h-workflow.md](./08-sprint-h-workflow.md)（H4 收尾见 L）
+✅ Sprint I  查询工厂 / 成员 / 统计 / 逾期 I5a → [09-sprint-i-job-stats.md](./09-sprint-i-job-stats.md)
+✅ Sprint J  验证码 / 在线用户 / 限流 / 防重 → [10-sprint-j-system-guard.md](./10-sprint-j-system-guard.md)
+▶ Sprint K  定时任务管理端 I5b → [11-sprint-k-quartz-admin.md](./11-sprint-k-quartz-admin.md)
+○ Sprint L  工作流打磨 → [12-sprint-l-workflow-polish.md](./12-sprint-l-workflow-polish.md)
+○ Sprint M  项目域加深 → [13-sprint-m-project-deepen.md](./13-sprint-m-project-deepen.md)
+○ Sprint N  服务/缓存监控 → [14-sprint-n-monitor-server.md](./14-sprint-n-monitor-server.md)
+○ Sprint O  代码生成 → [15-sprint-o-generator.md](./15-sprint-o-generator.md)
 ── 后置 ──
-   OA 企微 / generator / 动态数据源 / WebSocket
+   OA 企微 / 动态数据源 / WebSocket
 后端总览 → [01-backend-roadmap.md](./01-backend-roadmap.md)
 ```
 

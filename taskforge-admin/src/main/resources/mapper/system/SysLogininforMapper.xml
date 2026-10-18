@@ -32,7 +32,7 @@
             <if test="logininfor != null and logininfor.ipaddr != null and logininfor.ipaddr != ''">
                 AND ipaddr like concat('%', #{logininfor.ipaddr}, '%')
             </if>
-            <if test="logininfor != null and logininfor.status != null">
+            <if test="logininfor != null and logininfor.status != null and logininfor.status != ''">
                 AND status = #{logininfor.status}
             </if>
             <if test="logininfor != null and logininfor.userName != null and logininfor.userName != ''">

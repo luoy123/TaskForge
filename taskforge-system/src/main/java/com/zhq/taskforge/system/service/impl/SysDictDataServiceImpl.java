@@ -31,7 +31,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
         if(StringUtils.hasText(dictData.getDictLabel())){
             qw.like(SysDictData::getDictLabel, dictData.getDictLabel());
         }
-        if(dictData.getStatus()!=null){
+        if(StringUtils.hasText(dictData.getStatus())){
             qw.eq(SysDictData::getStatus, dictData.getStatus());
         }
         qw.orderByAsc(SysDictData::getDictSort);
