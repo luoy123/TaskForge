@@ -41,6 +41,11 @@
     <el-table v-loading="loading" :data="tableData" border>
       <el-table-column prop="projectName" label="项目名称" min-width="160" />
       <el-table-column prop="statusName" label="状态" width="100" />
+      <el-table-column label="审批" width="90">
+        <template #default="{ row }">
+          <ApprovalTag :approved="row.approved" />
+        </template>
+      </el-table-column>
       <el-table-column prop="stageName" label="阶段" width="120" />
       <el-table-column prop="nickName" label="负责人" width="120" />
       <el-table-column prop="createdTime" label="创建时间" width="180" />
@@ -84,6 +89,7 @@
             v-hasPermi="'project:manage:approve'"
             link
             type="success"
+            :disabled="String(row.approved) === '0'"
             @click="openApprove(row)"
           >发起审批</el-button>
           <el-button
@@ -157,6 +163,7 @@
       kind="project"
       :biz-id="approveBizId"
       :biz-label="approveBizLabel"
+      @success="getList"
     />
   </div>
 </template>
@@ -176,6 +183,7 @@ import {
 } from '@/api/project/project'
 import FilePanel from '@/components/project/FilePanel.vue'
 import MemberDrawer from '@/components/project/MemberDrawer.vue'
+import ApprovalTag from '@/components/workflow/ApprovalTag.vue'
 import ApproveStartDialog from '@/components/workflow/ApproveStartDialog.vue'
 import { PROJECT_LIST_TYPE_BY_COMPONENT } from '@/utils/permission'
 

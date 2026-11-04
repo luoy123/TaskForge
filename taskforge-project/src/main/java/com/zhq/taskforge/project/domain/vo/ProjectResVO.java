@@ -26,6 +26,9 @@ public class ProjectResVO {
 
     private String statusName;
 
+    /** 审批态（pmhub_project_task_process.approved）：0 审批中 / 1 通过 / 2 驳回；未发起过为 null */
+    private String approved;
+
     /** 对应表字段 type：0 公开 / 1 私有 */
     private Integer projectType;
 

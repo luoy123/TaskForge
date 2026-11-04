@@ -1,12 +1,12 @@
 # 前端 Sprint 07：系统缺页补齐（岗位 / 字典 / 参数 / 公告 / 日志）
 
 > **编号**：`plan/frontend/07`  
-> **状态**：**联调通过**（空 `status=` 列表为空已修；日志路由为 `/system/log/*`）  
+> **状态**：**联调通过**（空 `status=` 列表为空已修；日志路由为 `/system/log/*`）；**F07-7 角色菜单树已补**  
 
 
 > **目标**：把侧栏里仍进 `building` 的系统管理 / 监控日志页接到已有后端 API，减少「建设中」占位。  
 > **前置**：前端 01–06 完成；后端 B/C（日志、岗位、字典、参数、公告）主路径可用。  
-> **不做**：服务/缓存监控大盘（等后端 N）、代码生成 UI（等 O）、工作流分类/表单设计器、改后端接口契约。
+> **不做**：服务/缓存监控大盘（等后端 N）、代码生成 UI（等 O）、工作流分类/表单设计器、改后端接口契约；**数据权限弹窗**（部门树）仍可后置。
 
 ---
 
@@ -27,9 +27,10 @@ F07-3  岗位 / 参数 / 公告 CRUD 页（套路同用户页）
 F07-4  字典：类型列表 + 数据项（可抽屉/二级页）
 F07-5  登录日志 / 操作日志：查询 + 删除/清空
 F07-6  自测：侧栏点开各菜单不再进 building；超管 CRUD / 清日志 OK
+F07-7  角色编辑：菜单权限树（后端已有，原角色页未接）
 ```
 
-建议顺序：**1 → 2 → 3 → 5 → 4 → 6**（字典字段稍多，可后做）。
+建议顺序：**1 → 2 → 3 → 5 → 4 → 6**（字典字段稍多，可后做）；**F07-7** 可随时补（发现角色页无法分配菜单时）。
 
 **协作**：API + 表格/对话框壳由助手写；`getList` / `submitForm` / `handleDelete`（及日志清空）搜 `【学员填写】`。
 
@@ -106,6 +107,26 @@ taskforge-ui/src/
 | 登录日志有记录；清空后变少 | 与后端一致 |
 | 无权限角色 | 按钮消失或 403 |
 
+### F07-7 角色菜单权限（✅ 已落地）
+
+**背景**：角色编辑弹窗原先只有名称/权限字符/排序/状态/备注，未接菜单树。后端 `PUT /system/role` 的 `menuIds` 与 `GET /system/menu/roleMenuTreeselect/{roleId}` 已可用；不传 `menuIds` 时 `updateRole` 会先清空再按空列表插入，等于**冲掉该角色全部菜单**。
+
+**落位**：
+
+```text
+api/system/menu.js          # + treeselect · roleMenuTreeselect
+views/system/role/index.vue # 编辑弹窗加 el-tree；提交带 menuIds + menuCheckStrictly
+```
+
+**要点**：
+
+- 编辑：先调 `roleMenuTreeselect`，打开弹窗后 `setCheckedKeys(checkedKeys)`。
+- 提交：`menuIds = checkedKeys ∪ halfCheckedKeys`（父子联动时父节点常为半选）。
+- 顶层 `parent_id=0` 的按钮（如 `project:manage:approve`）会出现在树最外层，可勾。
+- 保存后提示：用户需**重新登录**刷新 Redis 里的权限缓存。
+
+**自测**：admin 编辑「测试管理员」勾上「项目审批 / 任务审批 / 任务办理 / 任务驳回」等 → 保存 → py 重登 → 项目列表出现「发起审批」。
+
 ---
 
 ## 4. 验收标准
@@ -115,6 +136,7 @@ taskforge-ui/src/
 - [x] 字典类型可维护，且能维护其下数据项（抽屉）
 - [x] 登录日志、操作日志可查询；支持删除与清空
 - [x] 权限字挂接，超管可操作（`v-hasPermi` 对齐 `sys_menu.perms`）
+- [x] 角色编辑可勾选菜单树并写回 `sys_role_menu`（F07-7）
 
 ```bash
 mvn -pl taskforge-admin -am -DskipTests compile
@@ -123,13 +145,8 @@ cd taskforge-ui && npm run dev
 
 ---
 
-## 5. 再往后（08 候选）
+## 5. 再往后
 
-| 候选 | 依赖 |
-|------|------|
-| 工作流打磨 UI（禁改提示 / 状态回写展示） | 后端 [L](../backend/12-sprint-l-workflow-polish.md) |
-| 项目阶段 / 工时 | 后端 [M](../backend/13-sprint-m-project-deepen.md) |
-| 服务 / 缓存监控页 | 后端 [N](../backend/14-sprint-n-monitor-server.md) |
-| 定时任务页联调收尾 | 后端 K 已齐，可单独冒烟 |
+08–19 已按后端 L–W 拆开，索引见 [plan/README.md](../README.md)。下一刀在本 Sprint 做完后，等对应后端再开（先 08 对齐 L）。
 
 路线总览：[plan/README.md](../README.md)。

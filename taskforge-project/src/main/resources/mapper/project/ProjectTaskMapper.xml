@@ -43,10 +43,12 @@
         select t.id as taskId, t.project_id, t.task_name, t.description,
         t.user_id, su.nick_name, t.project_stage_id, ps.stage_name,
         t.task_priority, t.status, t.execute_status, t.task_process,
-        t.task_pid, t.begin_time, t.end_time, t.close_time, t.created_time
+        t.task_pid, t.begin_time, t.end_time, t.close_time, t.created_time,
+        tp.approved
         from pmhub_project_task t
         left join sys_user su on su.user_id = t.user_id
         left join pmhub_project_stage ps on ps.id = t.project_stage_id
+        left join pmhub_project_task_process tp on tp.extra_id = t.id and tp.type = 'task'
         where t.deleted = 0
         and t.project_id = #{data.projectId}
         <if test="data.taskName != null and data.taskName != ''">

@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zhq.taskforge.common.enums.ProjectStatusEnum;
+import com.zhq.taskforge.common.enums.ProjectTaskStatusEnum;
 import com.zhq.taskforge.common.exception.ServiceException;
 import com.zhq.taskforge.common.utils.SecurityUtils;
 import com.zhq.taskforge.workflow.domain.WfTaskProcess;
@@ -126,6 +128,13 @@ public class WfProcessServiceImpl extends FlowServiceFactory implements IWfProce
         if (taskId == null || taskId.isBlank() || approver == null || approver.isBlank()) {
             throw new ServiceException("taskId 或 approver 不能为空");
         }
+        Integer status = wfTaskProcessMapper.selectTaskIdIfExists(taskId);
+        if(status == null){
+        throw new ServiceException("任务不存在");
+        }
+        if(ProjectTaskStatusEnum.FINISHED.getStatus().equals(status)){
+            throw new ServiceException("任务已完成，无法发起审批");
+        }
 
         // 2. 查关联表：已在审批中则拒绝
         // 注意 type 要用 TYPE_TASK（"task"），不是 approver
@@ -190,6 +199,13 @@ public class WfProcessServiceImpl extends FlowServiceFactory implements IWfProce
         // 1. 参数校验（任务实体是否存在：MVP 先不校验，避免依赖 project）
         if (projectId == null || projectId.isBlank() || approver == null || approver.isBlank()) {
             throw new ServiceException("projectId 或 approver 不能为空");
+        }
+        Integer status =wfTaskProcessMapper.selectProjectIdIfExists(projectId);
+        if(status == null){
+            throw new ServiceException("项目不存在");
+        }
+        if(ProjectStatusEnum.ARCHIVED.getStatus().equals(status)){
+            throw new ServiceException("项目已完成，无法发起审批");
         }
 
         WfTaskProcess existing = wfTaskProcessMapper.selectOne(

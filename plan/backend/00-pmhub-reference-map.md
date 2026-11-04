@@ -164,17 +164,8 @@ Flowable：自动建表、异步 Job 默认关、IDM 关。
 ## 8. 推荐 TaskForge 路线（出计划时按此切 Sprint）
 
 ```
-✅ Sprint A–G  系统 → 项目 / 任务 / 文件
-✅ Sprint H  Flowable 主路径 → [08-sprint-h-workflow.md](./08-sprint-h-workflow.md)（H4 收尾见 L）
-✅ Sprint I  查询工厂 / 成员 / 统计 / 逾期 I5a → [09-sprint-i-job-stats.md](./09-sprint-i-job-stats.md)
-✅ Sprint J  验证码 / 在线用户 / 限流 / 防重 → [10-sprint-j-system-guard.md](./10-sprint-j-system-guard.md)
-▶ Sprint K  定时任务管理端 I5b → [11-sprint-k-quartz-admin.md](./11-sprint-k-quartz-admin.md)
-○ Sprint L  工作流打磨 → [12-sprint-l-workflow-polish.md](./12-sprint-l-workflow-polish.md)
-○ Sprint M  项目域加深 → [13-sprint-m-project-deepen.md](./13-sprint-m-project-deepen.md)
-○ Sprint N  服务/缓存监控 → [14-sprint-n-monitor-server.md](./14-sprint-n-monitor-server.md)
-○ Sprint O  代码生成 → [15-sprint-o-generator.md](./15-sprint-o-generator.md)
-── 后置 ──
-   OA 企微 / 动态数据源 / WebSocket
+✅ A–K  系统 → 项目/任务/文件 → Flowable 主路径 → 统计逾期 → 护栏 → 定时任务管理
+○ L→W  见总排期（审批打磨、项目加深、流程平台、物料、文档、网盘、监控、生成器、消息、WebSocket、异步）
 后端总览 → [01-backend-roadmap.md](./01-backend-roadmap.md)
 ```
 

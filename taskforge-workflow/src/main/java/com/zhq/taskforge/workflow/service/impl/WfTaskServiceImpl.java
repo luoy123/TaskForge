@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zhq.taskforge.common.enums.ProjectStatusEnum;
+import com.zhq.taskforge.common.enums.ProjectTaskStatusEnum;
 import com.zhq.taskforge.common.exception.ServiceException;
 import com.zhq.taskforge.common.utils.SecurityUtils;
 import com.zhq.taskforge.workflow.domain.WfTaskProcess;
@@ -64,6 +66,12 @@ public class WfTaskServiceImpl extends FlowServiceFactory implements IWfTaskServ
                 selectOne.setUpdatedBy(String.valueOf(SecurityUtils.getUserId()));
                 selectOne.setUpdatedTime(LocalDateTime.now());
                 wfTaskProcessMapper.updateById(selectOne);
+                if("task".equals(selectOne.getType())){
+                    wfTaskProcessMapper.updateTaskStatus(selectOne.getExtraId(), ProjectTaskStatusEnum.DOING.getStatus());
+                }else if ("project".equals(selectOne.getType())) {
+                    wfTaskProcessMapper.upateProjectStatus(selectOne.getExtraId(), ProjectStatusEnum.DOING.getStatus());
+                }
+                
             }
         }
     }
@@ -92,6 +100,9 @@ public class WfTaskServiceImpl extends FlowServiceFactory implements IWfTaskServ
             process.setUpdatedBy(String.valueOf(SecurityUtils.getUserId()));
             process.setUpdatedTime(LocalDateTime.now());
             wfTaskProcessMapper.updateById(process);
+            if("task".equals(process.getType())){
+                wfTaskProcessMapper.updateTaskStatus(process.getExtraId(), ProjectTaskStatusEnum.NO_STARTED.getStatus());
+            }
         }
     }
 

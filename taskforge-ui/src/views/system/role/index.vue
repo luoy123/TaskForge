@@ -49,8 +49,8 @@
       />
     </div>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px" destroy-on-close>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="640px" destroy-on-close>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="form.roleName" />
         </el-form-item>
@@ -66,6 +66,25 @@
             <el-radio value="1">停用</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="菜单权限">
+          <div class="tree-toolbar">
+            <el-checkbox v-model="menuExpand" @change="handleExpandChange">展开/折叠</el-checkbox>
+            <el-checkbox v-model="menuNodeAll" @change="handleCheckAllChange">全选/全不选</el-checkbox>
+            <el-checkbox v-model="menuCheckStrictly">父子联动</el-checkbox>
+          </div>
+          <div v-loading="menuLoading" class="tree-box">
+            <el-tree
+              ref="menuTreeRef"
+              :data="menuOptions"
+              show-checkbox
+              node-key="id"
+              :check-strictly="!menuCheckStrictly"
+              :props="treeProps"
+              empty-text="暂无菜单"
+            />
+          </div>
+          <div class="field-tip">保存后写入 sys_role_menu；用户需重新登录才会刷新权限缓存。</div>
+        </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="form.remark" type="textarea" />
         </el-form-item>
@@ -79,17 +98,32 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { roleMenuTreeselect, treeselect } from '@/api/system/menu'
 import { addRole, delRole, listRole, updateRole } from '@/api/system/role'
 
 const loading = ref(false)
 const submitLoading = ref(false)
+const menuLoading = ref(false)
 const tableData = ref([])
 const total = ref(0)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增角色')
 const formRef = ref()
+const menuTreeRef = ref()
+const menuOptions = ref([])
+/** 打开编辑弹窗后待回填的已勾选 menuId */
+const pendingCheckedKeys = ref([])
+const menuExpand = ref(false)
+const menuNodeAll = ref(false)
+/** true = 父子联动（对应后端 menuCheckStrictly=1） */
+const menuCheckStrictly = ref(true)
+
+const treeProps = {
+  label: 'label',
+  children: 'children',
+}
 
 const query = reactive({
   pageNum: 1,
@@ -118,9 +152,83 @@ function resetForm() {
   form.roleSort = 0
   form.status = '0'
   form.remark = ''
+  menuOptions.value = []
+  pendingCheckedKeys.value = []
+  menuExpand.value = false
+  menuNodeAll.value = false
+  menuCheckStrictly.value = true
 }
 
-function openDialog(row) {
+function collectAllNodeIds(nodes, out = []) {
+  for (const n of nodes || []) {
+    out.push(n.id)
+    if (n.children?.length) {
+      collectAllNodeIds(n.children, out)
+    }
+  }
+  return out
+}
+
+function setTreeExpand(expand) {
+  const tree = menuTreeRef.value
+  if (!tree?.store?.nodesMap) return
+  for (const node of Object.values(tree.store.nodesMap)) {
+    node.expanded = expand
+  }
+}
+
+function handleExpandChange(val) {
+  setTreeExpand(!!val)
+}
+
+function handleCheckAllChange(val) {
+  const tree = menuTreeRef.value
+  if (!tree) return
+  if (val) {
+    tree.setCheckedKeys(collectAllNodeIds(menuOptions.value))
+  } else {
+    tree.setCheckedKeys([])
+  }
+}
+
+/** 勾选 + 半选（父子联动时父节点常为半选，必须一并提交） */
+function getMenuAllCheckedKeys() {
+  const tree = menuTreeRef.value
+  if (!tree) return []
+  const checked = tree.getCheckedKeys() || []
+  const half = tree.getHalfCheckedKeys() || []
+  return [...new Set([...checked, ...half])]
+}
+
+async function loadMenuTreeForCreate() {
+  menuLoading.value = true
+  try {
+    const { data: res } = await treeselect()
+    menuOptions.value = res.data || []
+    pendingCheckedKeys.value = []
+  } finally {
+    menuLoading.value = false
+  }
+}
+
+async function loadMenuTreeForEdit(roleId) {
+  menuLoading.value = true
+  try {
+    const { data: res } = await roleMenuTreeselect(roleId)
+    const payload = res.data || {}
+    menuOptions.value = payload.menus || []
+    pendingCheckedKeys.value = payload.checkedKeys || []
+  } finally {
+    menuLoading.value = false
+  }
+}
+
+async function applyCheckedKeys() {
+  await nextTick()
+  menuTreeRef.value?.setCheckedKeys(pendingCheckedKeys.value || [])
+}
+
+async function openDialog(row) {
   resetForm()
   if (row) {
     dialogTitle.value = '编辑角色'
@@ -130,10 +238,17 @@ function openDialog(row) {
     form.roleSort = row.roleSort ?? 0
     form.status = row.status ?? '0'
     form.remark = row.remark || ''
+    // 后端 Integer：1 联动 / 0 不联动
+    menuCheckStrictly.value = row.menuCheckStrictly == null || Number(row.menuCheckStrictly) === 1
+    await loadMenuTreeForEdit(row.roleId)
+    dialogVisible.value = true
+    await applyCheckedKeys()
   } else {
     dialogTitle.value = '新增角色'
+    await loadMenuTreeForCreate()
+    dialogVisible.value = true
+    await applyCheckedKeys()
   }
-  dialogVisible.value = true
 }
 
 function handleQuery() {
@@ -146,9 +261,6 @@ function resetQuery() {
   handleQuery()
 }
 
-/** ========== 【学员填写 R-C】拉取角色列表（与用户页 getList 同套路） ==========
- * listRole(query) → res.data.records / res.data.total
- */
 async function getList() {
   loading.value = true
   try {
@@ -160,18 +272,25 @@ async function getList() {
   }
 }
 
-/** ========== 【学员填写 R-D】新增/编辑 ==========
- * form.roleId 有值 → updateRole(form)，否则 addRole(form)
- */
 async function submitForm() {
   await formRef.value.validate()
   submitLoading.value = true
   try {
+    const payload = {
+      roleId: form.roleId,
+      roleName: form.roleName,
+      roleKey: form.roleKey,
+      roleSort: form.roleSort,
+      status: form.status,
+      remark: form.remark,
+      menuCheckStrictly: menuCheckStrictly.value ? 1 : 0,
+      menuIds: getMenuAllCheckedKeys(),
+    }
     if (form.roleId) {
-      await updateRole(form)
-      ElMessage.success('修改成功')
+      await updateRole(payload)
+      ElMessage.success('修改成功，相关用户请重新登录以刷新权限')
     } else {
-      await addRole(form)
+      await addRole(payload)
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false
@@ -181,9 +300,6 @@ async function submitForm() {
   }
 }
 
-/** ========== 【学员填写 R-E】删除 ==========
- * 勿删 roleId===1；delRole(row.roleId)
- */
 async function handleDelete(row) {
   if (row.roleId === 1) {
     ElMessage.warning('不能删除超级管理员角色')
@@ -212,5 +328,25 @@ onMounted(() => {
 .pager {
   display: flex;
   justify-content: flex-end;
+}
+.tree-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.tree-box {
+  width: 100%;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--el-border-color);
+  border-radius: 4px;
+  padding: 8px;
+}
+.field-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.4;
 }
 </style>

@@ -45,11 +45,13 @@
         p.type as projectType, p.status, p.published, p.project_process,
         p.created_time, p.updated_time, p.description, p.cover,
         p.auto_update_process, p.open_prefix, p.prefix,
-        p.open_task_private, p.msg_notify, p.notify_day
+        p.open_task_private, p.msg_notify, p.notify_day,
+        tp.approved
         from pmhub_project p
         left join pmhub_project_stage ps on p.project_stage_id = ps.id
         left join pmhub_project_member pm on p.id = pm.pt_id
         left join sys_user su on su.user_id = p.user_id
+        left join pmhub_project_task_process tp on tp.extra_id = p.id and tp.type = 'project'
         where pm.user_id = #{userId}
               and pm.type = 'project'
               and p.deleted = 0
@@ -91,11 +93,13 @@
                    p.type as projectType, p.status, p.published, p.project_process,
                    p.created_time, p.updated_time, p.description, p.cover,
                    p.auto_update_process, p.open_prefix, p.prefix,
-                   p.open_task_private, p.msg_notify, p.notify_day
+                   p.open_task_private, p.msg_notify, p.notify_day,
+                   tp.approved
             from pmhub_project p
             left join pmhub_project_stage ps on p.project_stage_id = ps.id
             left join pmhub_project_collection pc on p.id = pc.project_id
             left join sys_user su on su.user_id = p.user_id
+            left join pmhub_project_task_process tp on tp.extra_id = p.id and tp.type = 'project'
             where pc.user_id = #{userId}
               and p.deleted = 0
             <if test="req.keyword != null and req.keyword != ''">

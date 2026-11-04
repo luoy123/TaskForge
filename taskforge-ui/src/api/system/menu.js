@@ -20,3 +20,16 @@ export function updateMenu(data) {
 export function delMenu(menuId) {
   return request.delete(`/system/menu/${menuId}`)
 }
+
+/** GET /system/menu/treeselect → R<List<TreeSelect>> 菜单下拉树 */
+export function treeselect(params) {
+  return request.get('/system/menu/treeselect', { params })
+}
+
+/**
+ * GET /system/menu/roleMenuTreeselect/{roleId}
+ * → R<{ menus: TreeSelect[], checkedKeys: Long[] }>
+ */
+export function roleMenuTreeselect(roleId) {
+  return request.get(`/system/menu/roleMenuTreeselect/${roleId}`)
+}

@@ -33,7 +33,7 @@
         type="info"
         :closable="false"
         show-icon
-        title="发起后 approved=0，任务改状态会被后端拒绝，直到审批通过/驳回。"
+        title="发起后进入「审批中」，期间不能修改状态；通过后变为进行中，驳回后可重新发起。"
       />
     </el-form>
     <template #footer>
@@ -99,6 +99,8 @@ async function submit() {
     ElMessage.success('已发起审批')
     emit('update:modelValue', false)
     emit('success')
+  } catch {
+    // 重复发起、任务不存在等由 request 拦截器弹出后端 message，这里不重复提示
   } finally {
     loading.value = false
   }

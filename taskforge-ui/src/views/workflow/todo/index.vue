@@ -128,13 +128,15 @@ async function submitHandle() {
     const body = { taskId: current.value.taskId, comment: comment.value || undefined }
     if (action.value === 'reject') {
       await rejectTask(body)
-      ElMessage.success('已驳回')
+      ElMessage.success('已驳回，回到项目/任务列表可看到最新状态')
     } else {
       await completeTask(body)
-      ElMessage.success('已同意')
+      ElMessage.success('已同意，回到项目/任务列表可看到最新状态')
     }
     dialogVisible.value = false
     getList()
+  } catch {
+    // 错误已由 request 拦截器提示
   } finally {
     submitLoading.value = false
   }

@@ -205,6 +205,14 @@ public class ProjectServiceImpl implements IProjectService {
             project.setType(project.getProjectType());
         }
 
+        if (project.getStatus() != null){
+            String approved = projectTaskMapper.selectApproved(project.getId(),"project");
+            if("0".equals(approved)){
+                throw new ServiceException("审判中，无法修改状态");
+            }
+        }
+
+
         // 阶段写回
         if (project.getStageCode() != null) {
             LambdaQueryWrapper<ProjectStage> qw = new LambdaQueryWrapper<>();

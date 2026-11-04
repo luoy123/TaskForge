@@ -46,6 +46,11 @@
         <el-table-column type="selection" width="45" />
         <el-table-column prop="taskName" label="任务名称" min-width="160" />
         <el-table-column prop="statusName" label="状态" width="100" />
+        <el-table-column label="审批" width="90">
+          <template #default="{ row }">
+            <ApprovalTag :approved="row.approved" />
+          </template>
+        </el-table-column>
         <el-table-column prop="priorityName" label="优先级" width="100" />
         <el-table-column prop="nickName" label="执行人" width="120" />
         <el-table-column prop="createdTime" label="创建时间" width="180" />
@@ -56,6 +61,7 @@
               v-hasPermi="'project:task:approve'"
               link
               type="success"
+              :disabled="isApproving(row)"
               @click="openApprove(row)"
             >发起审批</el-button>
             <el-button
@@ -102,13 +108,19 @@
           <el-input v-model="form.description" type="textarea" rows="3" />
         </el-form-item>
         <el-form-item v-if="form.taskId" label="状态">
-          <el-select v-model="form.status" clearable placeholder="不改则留空" style="width: 100%">
+          <el-select
+            v-model="form.status"
+            clearable
+            placeholder="不改则留空"
+            :disabled="form.approving"
+            style="width: 100%"
+          >
             <el-option label="未开始" :value="0" />
             <el-option label="进行中" :value="1" />
             <el-option label="已完成" :value="2" />
             <el-option label="已逾期" :value="3" />
           </el-select>
-          <div class="field-tip">审批中（approved=0）时改状态会被后端拒绝。</div>
+          <div v-if="form.approving" class="field-tip">审批中不可修改状态，名称和描述仍可修改。</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -129,6 +141,7 @@
       kind="task"
       :biz-id="approveBizId"
       :biz-label="approveBizLabel"
+      @success="getList"
     />
   </div>
 </template>
@@ -148,6 +161,7 @@ import {
 } from '@/api/project/task'
 import FilePanel from '@/components/project/FilePanel.vue'
 import TaskDetailDrawer from '@/components/project/TaskDetailDrawer.vue'
+import ApprovalTag from '@/components/workflow/ApprovalTag.vue'
 import ApproveStartDialog from '@/components/workflow/ApproveStartDialog.vue'
 import { saveBlobResponse } from '@/utils/download'
 
@@ -183,10 +197,17 @@ const form = reactive({
   taskName: '',
   description: '',
   status: undefined,
+  /** 打开编辑框时的原状态，用来判断用户有没有改 */
+  originStatus: undefined,
+  approving: false,
 })
 
 const rules = {
   taskName: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
+}
+
+function isApproving(row) {
+  return String(row?.approved) === '0'
 }
 
 function resetForm() {
@@ -194,6 +215,8 @@ function resetForm() {
   form.taskName = ''
   form.description = ''
   form.status = undefined
+  form.originStatus = undefined
+  form.approving = false
 }
 
 function openDialog(row) {
@@ -204,6 +227,8 @@ function openDialog(row) {
     form.taskName = row.taskName
     form.description = row.description || ''
     form.status = row.status
+    form.originStatus = row.status
+    form.approving = isApproving(row)
   } else {
     dialogTitle.value = '新增任务'
   }
@@ -261,7 +286,13 @@ async function submitForm() {
         taskName: form.taskName,
         description: form.description,
       }
-      if (form.status !== undefined && form.status !== null && form.status !== '') {
+      // 后端只要 body 带了 status 且在审批中就会拒绝，所以没改就不传
+      const statusChanged =
+        form.status !== undefined &&
+        form.status !== null &&
+        form.status !== '' &&
+        form.status !== form.originStatus
+      if (statusChanged) {
         payload.status = form.status
       }
       await editTask(payload)
@@ -276,6 +307,8 @@ async function submitForm() {
     }
     dialogVisible.value = false
     getList()
+  } catch {
+    // request 拦截器已弹出后端 message，这里保持弹框不关即可
   } finally {
     submitLoading.value = false
   }

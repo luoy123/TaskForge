@@ -1,23 +1,71 @@
 # Sprint M：项目域加深（阶段 / 工时 / 动态 / 通知）（自学版）
 
 > **状态**：排队  
+> **估算**：4～6 人日  
 > **目标**：对照 pmhub-project 未仿完的中层能力：阶段管理、工时、任务动态工厂、字段变更日志、逾期通知表（先落库+API，不接企微）。  
 > **前置**：E–F、I（成员/统计已有）。  
 > **不做**：物料 materials、网盘 public_file、企微推送实连、完整甘特。
 
+## 文件对照
+
+| 看 pmhub | TaskForge |
+|----------|-----------|
+| `pmhub-admin/.../project/ProjectStageController.java` | **新建** `taskforge-admin/.../controller/project/ProjectStageController.java` |
+| `pmhub-project/.../service/impl/ProjectStageServiceImpl.java` | **新建** `.../service/IProjectStageService.java`、`.../service/impl/ProjectStageServiceImpl.java` |
+| `pmhub-project/.../domain/ProjectStage.java`、`mapper/ProjectStageMapper.java` | **已有**，不新建 |
+| `pmhub-project/.../domain/ProjectTaskWorkTime.java`、`mapper/ProjectTaskWorkTimeMapper.java` | **新建** 同名实体 + Mapper；Service 与接口挂在 `ProjectTaskController`（pmhub 工时没有单独 Controller） |
+| `pmhub-project/.../service/task/QueryTaskLogFactory.java` | **新建** `taskforge-project/.../service/task/QueryTaskLogFactory.java`（或只在现有 `log/list` 加 type，二选一） |
+| `pmhub-project/.../domain/vo/project/log/ForUpdate.java`、`FieldUtils.java` | **新建** `taskforge-project/.../domain/vo/log/ForUpdate.java`、`FieldUtils.java` |
+| `pmhub-project/.../domain/ProjectTaskNotify.java`、`mapper/ProjectTaskNotifyMapper.java`、`job/TaskNotifyJob.java` | **新建** 实体、Mapper、`taskforge-project/.../job/TaskNotifyJob.java` |
+| `pmhub-admin/.../project/ProjectLogController.java` | 项目维度日志若要独立接口，**新建** `ProjectLogController.java`；任务日志继续改 `ProjectTaskController` |
+
+包路径前缀：`src/main/java/com/zhq/taskforge/`。
+
 ---
 
-## 0. 范围
+## 0. 过程
 
-```text
-M1  项目阶段：列表 / 新增 / 重命名 / 删除（有任务占用则拒）+ 切换当前阶段
-M2  工时：pmhub_project_task_work_time CRUD（登记 / 列表 / 汇总）
-M3  QueryTaskLogFactory：全部 / 动态 / 交付物 / 评论 分流（或 list 增加 type）
-M4  任务编辑字段变更日志（@ForUpdate 或手写 diff，写 ProjectLog）
-M5  （可选）task_notify：到期前提醒记录表读写；真正发消息留给 OA Sprint
-```
+库表都已有，不要新建表。字段以 `sql/pmhub_20240305.sql` 为准，实体只映射表里有的列。
 
-库表已有：`pmhub_project_stage`、`pmhub_project_task_work_time`、`pmhub_project_log`、`pmhub_project_task_notify`。
+### M1 阶段
+
+1. 打开 pmhub 的 `ProjectStageController`、`ProjectStageServiceImpl`，看 list/add/edit/delete 的入参。
+2. 新建 Service：`list(projectId)` 按 `stageCode` 升序。
+3. `add`：同一项目下 `stageName` 不重复；`stageCode` 取当前最大值 +1。
+4. `edit`：只允许改名称。
+5. `delete`：先 `selectCount` 任务表 `project_stage_id = 该阶段`。大于 0 就拒绝：「阶段下仍有任务」。同时禁止删掉项目当前阶段。
+6. `setCurrent`：把 `pmhub_project.project_stage_id` 更新为该阶段 id。之后走一遍现有「新建任务」，确认新任务的 `projectStageId` 是这个阶段。
+7. Controller 挂到 `/project/stage`，权限字自己加一串，例如 `project:stage:list`。
+
+### M2 工时
+
+时长单位用**小时**，一位小数，和表字段类型不一致时在计划旁注一行再写代码。
+
+1. 实体、Mapper 映射 `pmhub_project_task_work_time`。
+2. `POST /project/task/workTime/add`：body 有 `taskId`、`hours`。`userId` 用当前登录用户，不信前端传的 userId。`hours <= 0` 拒绝。
+3. `POST /project/task/workTime/list`：按 `taskId` 分页，带上登记人昵称（join `sys_user`）。
+4. 同接口或单独字段返回 `sum(hours)`。
+5. `delete`：只允许删自己的记录，超管除外。
+
+### M3 动态分流
+
+1. 看现有 `POST /project/task/log/list` 怎么查 `pmhub_project_log`。
+2. body 增加 `logType`：空=全部，`dynamic` / `deliverable` / `comment` 三种。对照 pmhub `QueryTaskLogFactory` 每种 type 过滤哪个 `operateType`。
+3. 在 Service 里用 if/switch 拼 wrapper 即可。工厂类可以建，但不要为了类名卡住。
+4. 评论接口已经会 insert 日志的话，用 `logType=comment` 能查到刚写的那条。
+
+### M4 编辑字段日志
+
+1. 在 `ProjectTaskServiceImpl.edit` 里，更新前先 `selectById` 拿到旧任务。
+2. 对比白名单：`taskName`、`status`、`executor`（或执行人字段）、`closeTime`。变了的字段拼成一行中文，例如「任务名称：A → B」。
+3. insert 一条 `ProjectLog`，`type=task`，`operateType=editTask`，内容用上面的差异。没变化就不写日志。
+4. `@ForUpdate` 可以后补，这版用手写对比就行。
+
+### M5 提醒记录（可选）
+
+1. 实体映射 `pmhub_project_task_notify`。
+2. 提供 list：某任务的提醒配置。
+3. `TaskNotifyJob` 只插入「待发送」记录，不调企微。发送留给 Sprint U。
 
 ---
 
