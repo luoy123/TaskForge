@@ -41,6 +41,14 @@ AGENTS.md
 .specstory/
 .cursorindexingignore
 .codegraph/
+.lithe/
+.mybatis/
+.playwright-mcp/
+
+### local scratch / unrelated files ###
+scratch/
+/boss-login.png
+/sql/kindergarten_child_parent.sql
 
 ### log ###
 logs/
