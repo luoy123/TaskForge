@@ -203,9 +203,16 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
             task.setDescription(req.getDescription());
         }
         if (req.getTaskPriority() != null) {
+            if (ProjectTaskPriorityEnum.getStatusNameByStatus(req.getTaskPriority()) == null) {
+                throw new ServiceException("任务优先级不合法");
+            }
             task.setTaskPriority(req.getTaskPriority());
         }
-        if (req.getStatus() != null) {
+        if (req.getStatus() != null && !req.getStatus().equals(old.getStatus())) {
+            // 已逾期由 TaskOverdueJob 维护，待认领由认领流程维护，都不允许手动改成
+            if (!isManualStatus(req.getStatus())) {
+                throw new ServiceException("任务状态不合法，只能修改为未开始、进行中或已完成");
+            }
             // 审批中禁止手改状态（与 workflow 模块查同表，不依赖 workflow）
             String approved = projectTaskMapper.selectApproved(req.getTaskId(), "task");
             if ("0".equals(approved)) {
@@ -220,6 +227,13 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
             task.setUserId(req.getUserId());
         }
         if (req.getProjectStageId() != null) {
+            ProjectStage stage = projectStageMapper.selectById(req.getProjectStageId());
+            if (stage == null) {
+                throw new ServiceException("阶段不存在");
+            }
+            if (!old.getProjectId().equals(stage.getProjectId())) {
+                throw new ServiceException("阶段不属于当前项目");
+            }
             task.setProjectStageId(req.getProjectStageId());
         }
         task.setUpdatedBy(SecurityUtils.getUsername());
@@ -229,6 +243,12 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
         if(content != null && !content.isBlank()){
             saveLog("editTask", req.getTaskId(), old.getProjectId(), content, "编辑了任务", null);
         }
+    }
+
+    private boolean isManualStatus(Integer status) {
+        return ProjectTaskStatusEnum.NO_STARTED.getStatus().equals(status)
+                || ProjectTaskStatusEnum.DOING.getStatus().equals(status)
+                || ProjectTaskStatusEnum.FINISHED.getStatus().equals(status);
     }
 
     @Override

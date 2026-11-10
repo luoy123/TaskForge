@@ -121,9 +121,12 @@ public class ProjectStageServiceImpl implements IProjectStageService{
     }
 
     @Override
+    @Transactional (rollbackFor = Exception.class)
     public void edit(ProjectStageVO projectStageVO) {
         //1.stageId不能为空，projectId我们从后端数据库中进行获取。
-       
+        if(projectStageVO == null){
+            throw new ServiceException("项目阶段VO不能为空");
+        }
         if(projectStageVO.getStageId() == null || projectStageVO.getStageId().isBlank()){
             throw new ServiceException("阶段ID不能为空");
         }
