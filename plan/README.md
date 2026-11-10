@@ -1,5 +1,7 @@
 # TaskForge 计划索引
 
+**当前做到哪 → [PROGRESS.md](./PROGRESS.md)**（新对话从这里接续）
+
 计划按端拆开，避免前后端 Sprint 挤在同一层：
 
 ```text
@@ -14,8 +16,8 @@ plan/
 ## 后端 `backend/`
 
 ```text
-✅ A–K   系统 → 项目任务文件 → Flowable 主路径 → 统计逾期 → 护栏 → 定时任务
-○ L→W    见总排期，做完即覆盖 pmhub-boot 业务功能面
+✅ A–L   系统 → 项目任务文件 → Flowable 主路径 → 统计逾期 → 护栏 → 定时任务 → 审批打磨
+○ M→W    见总排期，做完即覆盖 pmhub-boot 业务功能面
 ```
 
 总览（含人日与覆盖表）：[backend/01-backend-roadmap.md](./backend/01-backend-roadmap.md)
@@ -29,9 +31,9 @@ plan/
 | [09-sprint-i-job-stats.md](./backend/09-sprint-i-job-stats.md) | I 统计 / 逾期 | ✅ I5a |
 | [10-sprint-j-system-guard.md](./backend/10-sprint-j-system-guard.md) | J 护栏 | ✅ |
 | [11-sprint-k-quartz-admin.md](./backend/11-sprint-k-quartz-admin.md) | K Job 管理端 | ✅ API（验收勾选可再补） |
-| [12-sprint-l-workflow-polish.md](./backend/12-sprint-l-workflow-polish.md) | L 审批打磨 | ○ 下一刀 |
-| [13-sprint-m-project-deepen.md](./backend/13-sprint-m-project-deepen.md) | M 项目域加深 | ○ |
-| [14-sprint-n-monitor-server.md](./backend/14-sprint-n-monitor-server.md) | N 服务/缓存监控 | ○ |
+| [12-sprint-l-workflow-polish.md](./backend/12-sprint-l-workflow-polish.md) | L 审批打磨 | ✅ |
+| [13-sprint-m-project-deepen.md](./backend/13-sprint-m-project-deepen.md) | M 项目域加深 | ✅ |
+| [14-sprint-n-monitor-server.md](./backend/14-sprint-n-monitor-server.md) | N 服务/缓存监控 | ○ 下一刀 |
 | [15-sprint-o-generator.md](./backend/15-sprint-o-generator.md) | O 代码生成 | ○ |
 | [16-sprint-p-workflow-platform.md](./backend/16-sprint-p-workflow-platform.md) | P 流程平台 | ○ |
 | [17-sprint-q-system-task-gap.md](./backend/17-sprint-q-system-task-gap.md) | Q 系统/任务边角 | ○ |
@@ -58,7 +60,7 @@ plan/
 | [01](./frontend/01-sprint-h-ui.md)～[06](./frontend/06-sprint-captcha-online.md) | A–J | ✅ |
 | [07-sprint-system-pages.md](./frontend/07-sprint-system-pages.md) | B/C 缺页 | ✅（含 F07-7 角色菜单树） |
 | [08-sprint-workflow-polish.md](./frontend/08-sprint-workflow-polish.md) | L | ▶ 待联调 |
-| [09-sprint-project-deepen.md](./frontend/09-sprint-project-deepen.md) | M | ○ |
+| [09-sprint-project-deepen.md](./frontend/09-sprint-project-deepen.md) | M | ✅ |
 | [10-sprint-workflow-platform.md](./frontend/10-sprint-workflow-platform.md) | P | ○ |
 | [11-sprint-system-task-gap.md](./frontend/11-sprint-system-task-gap.md) | Q | ○ |
 | [12-sprint-materials.md](./frontend/12-sprint-materials.md) | R | ○ |
@@ -76,7 +78,7 @@ plan/
 |------|------|
 | 前端少点「建设中」 | [07](./frontend/07-sprint-system-pages.md) 已完成；角色菜单树见 F07-7 |
 | 审批联调 / 前端状态展示 | [08](./frontend/08-sprint-workflow-polish.md) + 后端 [L](./backend/12-sprint-l-workflow-polish.md) |
-| 后端按总排期继续 | [L](./backend/12-sprint-l-workflow-polish.md) 起，做完再开对应 08+ |
+| 后端按总排期继续 | [N](./backend/14-sprint-n-monitor-server.md) 起；M 与前端 09 均已完成 |
 | 定时任务冒烟 | 已有 `views/monitor/job` |
 
 ## 约定

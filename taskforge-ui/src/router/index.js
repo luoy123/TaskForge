@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { usePermissionStore } from '@/stores/permission'
 
 /**
- * 常量路由：只保留公开页 + 布局壳 + 首页。
+ * 常量路由：只保留公开页 + 布局壳 + 首页 + 不进菜单的详情页（项目任务列表）。
  * 业务页全部走 getRouters 动态挂载（F04-2）。
  */
 export const constantRoutes = [
@@ -23,6 +23,12 @@ export const constantRoutes = [
         name: 'Home',
         component: () => import('@/views/home/index.vue'),
         meta: { title: '首页' },
+      },
+      {
+        path: 'project/task',
+        name: 'ProjectTask',
+        component: () => import('@/views/project/task/index.vue'),
+        meta: { title: '任务列表' },
       },
     ],
   },

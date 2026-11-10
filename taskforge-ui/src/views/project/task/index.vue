@@ -51,6 +51,7 @@
             <ApprovalTag :approved="row.approved" />
           </template>
         </el-table-column>
+        <el-table-column prop="stageName" label="阶段" width="110" />
         <el-table-column prop="priorityName" label="优先级" width="100" />
         <el-table-column prop="nickName" label="执行人" width="120" />
         <el-table-column prop="createdTime" label="创建时间" width="180" />
@@ -118,9 +119,20 @@
             <el-option label="未开始" :value="0" />
             <el-option label="进行中" :value="1" />
             <el-option label="已完成" :value="2" />
-            <el-option label="已逾期" :value="3" />
+            <el-option label="已逾期" :value="3" disabled />
+            <el-option label="待认领" :value="4" disabled />
           </el-select>
           <div v-if="form.approving" class="field-tip">审批中不可修改状态，名称和描述仍可修改。</div>
+        </el-form-item>
+        <el-form-item v-if="form.taskId" label="优先级">
+          <el-select v-model="form.taskPriority" clearable placeholder="不改则留空" style="width: 100%">
+            <el-option
+              v-for="p in PRIORITY_OPTIONS"
+              :key="p.value"
+              :label="p.label"
+              :value="p.value"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -192,6 +204,15 @@ const query = reactive({
   pageSize: 10,
 })
 
+/** 对齐后端 ProjectTaskPriorityEnum */
+const PRIORITY_OPTIONS = [
+  { value: 0, label: '最高' },
+  { value: 1, label: '较高' },
+  { value: 2, label: '普通' },
+  { value: 3, label: '较低' },
+  { value: 4, label: '最低' },
+]
+
 const form = reactive({
   taskId: undefined,
   taskName: '',
@@ -199,6 +220,8 @@ const form = reactive({
   status: undefined,
   /** 打开编辑框时的原状态，用来判断用户有没有改 */
   originStatus: undefined,
+  taskPriority: undefined,
+  originPriority: undefined,
   approving: false,
 })
 
@@ -216,7 +239,13 @@ function resetForm() {
   form.description = ''
   form.status = undefined
   form.originStatus = undefined
+  form.taskPriority = undefined
+  form.originPriority = undefined
   form.approving = false
+}
+
+function isChanged(value, origin) {
+  return value !== undefined && value !== null && value !== '' && value !== origin
 }
 
 function openDialog(row) {
@@ -228,6 +257,8 @@ function openDialog(row) {
     form.description = row.description || ''
     form.status = row.status
     form.originStatus = row.status
+    form.taskPriority = row.taskPriority
+    form.originPriority = row.taskPriority
     form.approving = isApproving(row)
   } else {
     dialogTitle.value = '新增任务'
@@ -287,13 +318,11 @@ async function submitForm() {
         description: form.description,
       }
       // 后端只要 body 带了 status 且在审批中就会拒绝，所以没改就不传
-      const statusChanged =
-        form.status !== undefined &&
-        form.status !== null &&
-        form.status !== '' &&
-        form.status !== form.originStatus
-      if (statusChanged) {
+      if (isChanged(form.status, form.originStatus)) {
         payload.status = form.status
+      }
+      if (isChanged(form.taskPriority, form.originPriority)) {
+        payload.taskPriority = form.taskPriority
       }
       await editTask(payload)
       ElMessage.success('修改成功')

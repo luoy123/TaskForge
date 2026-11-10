@@ -49,9 +49,15 @@
       <el-table-column prop="stageName" label="阶段" width="120" />
       <el-table-column prop="nickName" label="负责人" width="120" />
       <el-table-column prop="createdTime" label="创建时间" width="180" />
-      <el-table-column label="操作" width="520" fixed="right">
+      <el-table-column label="操作" width="570" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="goTasks(row)">任务</el-button>
+          <el-button
+            v-hasPermi="'project:stage:list'"
+            link
+            type="primary"
+            @click="openStages(row)"
+          >阶段</el-button>
           <el-button
             v-hasPermi="'project:member:list'"
             link
@@ -148,6 +154,13 @@
       </template>
     </el-dialog>
 
+    <StageDrawer
+      v-model="stageVisible"
+      :project-id="activeProjectId"
+      :project-name="activeProjectName"
+      :current-stage-code="activeStageCode"
+      @changed="getList"
+    />
     <MemberDrawer
       v-model="memberVisible"
       :project-id="activeProjectId"
@@ -183,6 +196,7 @@ import {
 } from '@/api/project/project'
 import FilePanel from '@/components/project/FilePanel.vue'
 import MemberDrawer from '@/components/project/MemberDrawer.vue'
+import StageDrawer from '@/components/project/StageDrawer.vue'
 import ApprovalTag from '@/components/workflow/ApprovalTag.vue'
 import ApproveStartDialog from '@/components/workflow/ApproveStartDialog.vue'
 import { PROJECT_LIST_TYPE_BY_COMPONENT } from '@/utils/permission'
@@ -204,9 +218,11 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('新增项目')
 const formRef = ref()
 const memberVisible = ref(false)
+const stageVisible = ref(false)
 const fileVisible = ref(false)
 const activeProjectId = ref('')
 const activeProjectName = ref('')
+const activeStageCode = ref(null)
 const approveVisible = ref(false)
 const approveBizId = ref('')
 const approveBizLabel = ref('')
@@ -273,6 +289,13 @@ function handleTypeChange(name) {
 
 function goTasks(row) {
   router.push({ path: '/project/task', query: { projectId: row.projectId } })
+}
+
+function openStages(row) {
+  activeProjectId.value = row.projectId
+  activeProjectName.value = row.projectName || ''
+  activeStageCode.value = row.stageCode ?? null
+  stageVisible.value = true
 }
 
 function openMembers(row) {

@@ -25,9 +25,24 @@ export function addComment(data) {
   return request.post('/project/task/addComment', data)
 }
 
-/** POST /project/task/log/list  body: { taskId, logType? } */
+/** POST /project/task/log/list  body: { taskId, logType? }  logType：不传全部 / 1 动态 / 2 交付物 / 3 评论 */
 export function listTaskLog(data) {
   return request.post('/project/task/log/list', data)
+}
+
+/** POST /project/task/workTime/add  body: { taskId, workTime }（小时，最多一位小数，0 < h ≤ 24） */
+export function addWorkTime(data) {
+  return request.post('/project/task/workTime/add', data)
+}
+
+/** POST /project/task/workTime/list  body: { taskId, pageNum, pageSize } → { page, totalWorkTime } */
+export function listWorkTime(data) {
+  return request.post('/project/task/workTime/list', data)
+}
+
+/** POST /project/task/workTime/delete  body: { workTimeId }（只能删自己的，超管除外） */
+export function delWorkTime(data) {
+  return request.post('/project/task/workTime/delete', data)
 }
 
 /** POST /project/task/addChildTask */
