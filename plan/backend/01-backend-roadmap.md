@@ -11,7 +11,7 @@
 
 ---
 
-## 已完成（A–K）
+## 已完成（A–L）
 
 | Sprint | 内容 | 文档 |
 |--------|------|------|
@@ -21,6 +21,7 @@
 | I | 我的/收藏/回收站、成员、统计、燃尽、逾期 Job | [09](./09-sprint-i-job-stats.md) |
 | J | 验证码、在线用户、限流、防重 | [10](./10-sprint-j-system-guard.md) |
 | K | 定时任务 CRUD + 执行日志 | [11](./11-sprint-k-quartz-admin.md) |
+| L | 启流校验、在审禁改、通过/驳回回写业务状态 | [12](./12-sprint-l-workflow-polish.md) |
 
 模块：`common / framework / system / project / workflow / quartz / admin`。
 
@@ -30,7 +31,6 @@
 
 | 顺序 | Sprint | 估算 | 文档 | 对齐 pmhub 的什么 |
 |------|--------|------|------|-------------------|
-| 1 | **L** 审批打磨 | 2～3 人日 | [12](./12-sprint-l-workflow-polish.md) | 在审禁改、通过/驳回回写业务状态 |
 | 2 | **M** 项目域加深 | 4～6 | [13](./13-sprint-m-project-deepen.md) | 阶段、工时、动态分流、字段日志、提醒记录 |
 | 3 | **P** 流程平台 | 8～12 | [16](./16-sprint-p-workflow-platform.md) | 分类/模型/部署/表单/实例/转办委派抄送 |
 | 4 | **Q** 系统与任务边角 | 4～6 | [17](./17-sprint-q-system-task-gap.md) | 用户导入导出、注册、头像、任务类型、模板、zip、认领 |

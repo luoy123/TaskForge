@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.project.mapper.ProjectTaskNotifyMapper">
+
+    <select id="selectDueSoonTasks" resultType="com.zhq.taskforge.project.domain.ProjectTaskNotify">
+        select pt.id as taskId, pt.task_name, pt.user_id, su.user_wx_name, pt.project_id, pt.close_time
+        from pmhub_project_task pt
+        join pmhub_project p on p.id = pt.project_id
+        left join sys_user su on su.user_id = pt.user_id
+        where p.deleted = 0
+          and p.msg_notify = 1
+          and p.status != #{pauseStatus}
+          and pt.deleted = 0
+          and pt.close_time is not null
+          and pt.status != #{finishedStatus}
+          <!-- 【学员填写①】距截止天数 = 项目的 notify_day；用 DATEDIFF(截止时间, CURDATE()) -->
+          <!-- 这里使用now也行，但是这里的CURDATE()是mysql服务器的今天 -->
+          and DATEDIFF(pt.close_time, CURDATE()) = p.notify_day
+          <!-- 【学员填写②】去重：not exists (select 1 from pmhub_project_task_notify n
+               where n.task_id = ... and n.close_time = ... and n.overdue = 0) -->
+               <!-- 去重主要是为了：避免同一个任务在同一天被通知多次 -->
+          and not exists(
+            select 1 from pmhub_project_task_notify n
+            where n.task_id = pt.id
+            and n.close_time = pt.close_time
+            and n.overdue = 0
+          )
+    </select>
+</mapper>

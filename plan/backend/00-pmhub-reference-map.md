@@ -164,8 +164,8 @@ Flowable：自动建表、异步 Job 默认关、IDM 关。
 ## 8. 推荐 TaskForge 路线（出计划时按此切 Sprint）
 
 ```
-✅ A–K  系统 → 项目/任务/文件 → Flowable 主路径 → 统计逾期 → 护栏 → 定时任务管理
-○ L→W  见总排期（审批打磨、项目加深、流程平台、物料、文档、网盘、监控、生成器、消息、WebSocket、异步）
+✅ A–L  系统 → 项目/任务/文件 → Flowable 主路径 → 统计逾期 → 护栏 → 定时任务管理 → 审批打磨
+○ M→W  见总排期（项目加深、流程平台、物料、文档、网盘、监控、生成器、消息、WebSocket、异步）
 后端总览 → [01-backend-roadmap.md](./01-backend-roadmap.md)
 ```
 

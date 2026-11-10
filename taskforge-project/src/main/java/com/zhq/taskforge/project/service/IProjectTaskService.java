@@ -3,12 +3,13 @@ package com.zhq.taskforge.project.service;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.zhq.taskforge.project.domain.ProjectLog;
 import com.zhq.taskforge.project.domain.vo.ProjectStatisticsResVO;
+import com.zhq.taskforge.project.domain.ProjectTaskNotify;
 import com.zhq.taskforge.project.domain.vo.ProjectVO;
 import com.zhq.taskforge.project.domain.vo.task.BurnDownChartVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExcelVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExportVO;
+import com.zhq.taskforge.project.domain.vo.task.TaskLogVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskReqVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskResVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskStatusStatsVO;
@@ -34,7 +35,7 @@ public interface IProjectTaskService {
 
     void addComment(TaskReqVO req);
 
-    List<ProjectLog> queryTaskLogList(TaskReqVO req);
+    List<TaskLogVO> queryTaskLogList(TaskReqVO req);
 
     /** 按任务 id 列表导出数据（G4） */
     List<TaskExportVO> export(List<String> taskIds);
@@ -58,5 +59,9 @@ public interface IProjectTaskService {
 
     /** I4：下拉用——我参与的项目 */
     List<ProjectVO> queryMyProjectOptions();
+
+    /** 查询通知列表 */
+    List<ProjectTaskNotify> queryNotifyList(String taskId);
+
 
 }

@@ -85,4 +85,10 @@ public interface ProjectTaskMapper extends BaseMapper<ProjectTask> {
          * @return
          */
         List<ProjectVO> selectMyProjectOptions(@Param("userId") Long userId);
+
+        /**
+         * 获取用户昵称
+         */
+        @Select("select nick_name from sys_user where user_id = #{userId}")
+        String selectNickNameByUserId(@Param ("userId") Long userId);
 }

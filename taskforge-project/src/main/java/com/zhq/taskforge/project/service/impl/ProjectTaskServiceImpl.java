@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,11 +26,13 @@ import com.zhq.taskforge.project.domain.ProjectLog;
 import com.zhq.taskforge.project.domain.ProjectMember;
 import com.zhq.taskforge.project.domain.ProjectStage;
 import com.zhq.taskforge.project.domain.ProjectTask;
+import com.zhq.taskforge.project.domain.ProjectTaskNotify;
 import com.zhq.taskforge.project.domain.vo.ProjectStatisticsResVO;
 import com.zhq.taskforge.project.domain.vo.ProjectVO;
 import com.zhq.taskforge.project.domain.vo.task.BurnDownChartVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExcelVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExportVO;
+import com.zhq.taskforge.project.domain.vo.task.TaskLogVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskReqVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskResVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskStatusStatsVO;
@@ -38,6 +41,7 @@ import com.zhq.taskforge.project.mapper.ProjectMapper;
 import com.zhq.taskforge.project.mapper.ProjectMemberMapper;
 import com.zhq.taskforge.project.mapper.ProjectStageMapper;
 import com.zhq.taskforge.project.mapper.ProjectTaskMapper;
+import com.zhq.taskforge.project.mapper.ProjectTaskNotifyMapper;
 import com.zhq.taskforge.project.service.IProjectTaskService;
 
 /**
@@ -56,6 +60,8 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
     private ProjectLogMapper projectLogMapper;
     @Autowired
     private ProjectStageMapper projectStageMapper;
+    @Autowired
+    private ProjectTaskNotifyMapper projectTaskNotifyMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -172,6 +178,7 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
     }
 
     @Override
+    @Transactional (rollbackFor = Exception.class)
     public void edit(TaskReqVO req) {
         if (req.getTaskId() == null || req.getTaskId().isBlank()) {
             throw new ServiceException("任务ID不能为空");
@@ -218,8 +225,10 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
         task.setUpdatedBy(SecurityUtils.getUsername());
         task.setUpdatedTime(LocalDateTime.now());
         projectTaskMapper.updateById(task);
-        saveLog("editTask", req.getTaskId(), old.getProjectId(),
-                req.getTaskName() != null ? req.getTaskName() : old.getTaskName(), "编辑了任务", null);
+        String content = buildChangeContent(old, req);
+        if(content != null && !content.isBlank()){
+            saveLog("editTask", req.getTaskId(), old.getProjectId(), content, "编辑了任务", null);
+        }
     }
 
     @Override
@@ -305,18 +314,22 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
     }
 
     @Override
-    public List<ProjectLog> queryTaskLogList(TaskReqVO req) {
+    public List<TaskLogVO> queryTaskLogList(TaskReqVO req) {
         if (req.getTaskId() == null || req.getTaskId().isBlank()) {
             throw new ServiceException("任务ID不能为空");
         }
-        LambdaQueryWrapper<ProjectLog> qw = new LambdaQueryWrapper<>();
-        qw.eq(ProjectLog::getPtId, req.getTaskId())
-                .eq(ProjectLog::getType, ProjectStatusEnum.TASK.getStatusName());
-        if (req.getLogType() != null) {
-            qw.eq(ProjectLog::getLogType, req.getLogType());
+        //2.校验logType
+        if (req.getLogType() != null && req.getLogType() != -1 && req.getLogType() != 1 && req.getLogType() != 2
+                && req.getLogType() != 3) {
+            throw new ServiceException("logType 不合法");
         }
-        qw.orderByDesc(ProjectLog::getCreatedTime);
-        return projectLogMapper.selectList(qw);
+       //3.调用mapper
+       List<TaskLogVO> selectTaskLogList = projectLogMapper.selectTaskLogList(req.getTaskId(), req.getLogType());
+        //4.设置名称
+        for (TaskLogVO log : selectTaskLogList) {
+            log.setLogTypeName(LogTypeEnum.getStatusNameByStatus(log.getLogType()));
+        }
+        return selectTaskLogList;
     }
 
     @Override
@@ -584,4 +597,57 @@ public class ProjectTaskServiceImpl implements IProjectTaskService {
         }
         return list;
     }
+
+    /**
+     * 只判断四个字段: 任务名称，任务状态，优先级，执行人
+     * @param old
+     * @param req
+     * @return
+     */
+    private String buildChangeContent(ProjectTask old, TaskReqVO req){
+        List<String> change = new ArrayList<>();
+
+        //1.任务名称
+        if(req.getTaskName() != null && !Objects.equals(req.getTaskName(),old.getTaskName())){
+            change.add("任务名称：" + nvl(old.getTaskName()) + " -> " + req.getTaskName());
+        }
+        //2.任务状态
+        if(req.getStatus() != null && !Objects.equals(req.getStatus(),old.getStatus())){
+            change.add("任务状态：" + nvl(ProjectTaskStatusEnum.getStatusNameByStatus(old.getStatus())) + " -> " + nvl(ProjectTaskStatusEnum.getStatusNameByStatus(req.getStatus())));
+        }
+        //3.优先级
+        if(req.getTaskPriority() != null && !Objects.equals(req.getTaskPriority(),old.getTaskPriority())){
+            change.add("优先级：" + nvl(ProjectTaskPriorityEnum.getStatusNameByStatus(old.getTaskPriority())) + " -> " + nvl(ProjectTaskPriorityEnum.getStatusNameByStatus(req.getTaskPriority())));
+        }
+        //4.执行人
+        if(req.getUserId() != null && !Objects.equals(req.getUserId(),old.getUserId())){
+            change.add("执行人：" + nvl(projectTaskMapper.selectNickNameByUserId(old.getUserId())) + " -> " + nvl(projectTaskMapper.selectNickNameByUserId(req.getUserId())));
+        }
+        return String.join(";", change);
+    }
+
+    //防NULL兜底策略
+    private String nvl(String s){
+        return s == null ? "无" : s;
+    }
+
+    @Override 
+    public List<ProjectTaskNotify> queryNotifyList(String taskId){
+        //1.taskId校验
+        if(taskId == null || taskId.isBlank()){
+            throw new ServiceException("任务Id不能为空");
+        }
+        //2.任务查询
+        ProjectTask task = projectTaskMapper.selectById(taskId);
+        if (task == null || Integer.valueOf(1).equals(task.getDeleted())) {
+            throw new ServiceException("任务不存在");
+        }
+        //3.查询改任务的通知列表
+        LambdaQueryWrapper<ProjectTaskNotify> qw = new LambdaQueryWrapper<ProjectTaskNotify>()
+        .eq(ProjectTaskNotify::getTaskId, taskId)
+        .orderByDesc(ProjectTaskNotify::getCloseTime);
+        List<ProjectTaskNotify> list = projectTaskNotifyMapper.selectList(qw);
+        return list;
+    }
+
 }

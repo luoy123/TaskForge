@@ -20,15 +20,19 @@ import com.zhq.taskforge.common.constants.PermissionConstants;
 import com.zhq.taskforge.common.core.domain.R;
 import com.zhq.taskforge.common.enums.BusinessType;
 import com.zhq.taskforge.common.exception.ServiceException;
-import com.zhq.taskforge.project.domain.ProjectLog;
+import com.zhq.taskforge.project.domain.ProjectTaskNotify;
 import com.zhq.taskforge.project.domain.vo.ProjectVO;
 import com.zhq.taskforge.project.domain.vo.task.BurnDownChartVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExcelVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskExportVO;
+import com.zhq.taskforge.project.domain.vo.task.TaskLogVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskReqVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskResVO;
 import com.zhq.taskforge.project.domain.vo.task.TaskStatusStatsVO;
+import com.zhq.taskforge.project.domain.vo.task.WorkTimePageVO;
+import com.zhq.taskforge.project.domain.vo.task.WorkTimeReqVO;
 import com.zhq.taskforge.project.service.IProjectTaskService;
+import com.zhq.taskforge.project.service.IProjectTaskWorkTimeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,6 +48,8 @@ public class ProjectTaskController {
 
     @Autowired
     private IProjectTaskService projectTaskService;
+    @Autowired
+    private IProjectTaskWorkTimeService projectTaskWorkTimeService;
 
     @PostMapping("/add")
     @Operation(summary = "新增任务")
@@ -112,7 +118,7 @@ public class ProjectTaskController {
     @PostMapping("/log/list")
     @Operation(summary = "任务动态/评论列表")
     @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_LOG_LIST + "')")
-    public R<List<ProjectLog>> logList(@RequestBody TaskReqVO req) {
+    public R<List<TaskLogVO>> logList(@RequestBody TaskReqVO req) {
         return R.ok(projectTaskService.queryTaskLogList(req));
     }
 
@@ -169,6 +175,38 @@ public class ProjectTaskController {
             + PermissionConstants.PROJECT_TASK_SITUATION + "')")
     public R<List<BurnDownChartVO>> burnDownChart(@RequestBody ProjectVO vo) {
         return R.ok(projectTaskService.burnDownChart(vo.getProjectId()));
+    }
+
+    @PostMapping("/workTime/add")
+    @Operation(summary = "登记工时")
+    @Log(title = "任务工时", businessType = BusinessType.INSERT)
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_EDIT + "')")
+    public R<Void> addWorkTime(@RequestBody WorkTimeReqVO req) {
+        projectTaskWorkTimeService.add(req);
+        return R.ok();
+    }
+
+    @PostMapping("/workTime/list")
+    @Operation(summary = "任务工时列表（含总工时）")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_DETAIL + "')")
+    public R<WorkTimePageVO> listWorkTime(@RequestBody WorkTimeReqVO req) {
+        return R.ok(projectTaskWorkTimeService.list(req));
+    }
+
+    @PostMapping("/workTime/delete")
+    @Operation(summary = "删除工时")
+    @Log(title = "任务工时", businessType = BusinessType.DELETE)
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_EDIT + "')")
+    public R<Void> deleteWorkTime(@RequestBody WorkTimeReqVO req) {
+        projectTaskWorkTimeService.delete(req.getWorkTimeId());
+        return R.ok();
+    }
+
+    @PostMapping("/notify/list")
+    @Operation(summary = "任务提醒记录")
+    @PreAuthorize("hasAnyAuthority('" + PermissionConstants.PROJECT_TASK_DETAIL + "')")
+    public R<List<ProjectTaskNotify>> notifyList(@RequestBody TaskReqVO req) {
+        return R.ok(projectTaskService.queryNotifyList(req.getTaskId()));
     }
 
     private void writeExcel(HttpServletResponse response, String sheetName, List<TaskExportVO> list)

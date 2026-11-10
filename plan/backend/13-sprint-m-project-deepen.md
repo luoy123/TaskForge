@@ -1,6 +1,6 @@
 # Sprint M：项目域加深（阶段 / 工时 / 动态 / 通知）（自学版）
 
-> **状态**：排队  
+> **状态**：✅ 已完成（2026-11-10）  
 > **估算**：4～6 人日  
 > **目标**：对照 pmhub-project 未仿完的中层能力：阶段管理、工时、任务动态工厂、字段变更日志、逾期通知表（先落库+API，不接企微）。  
 > **前置**：E–F、I（成员/统计已有）。  
@@ -41,6 +41,8 @@
 
 时长单位用**小时**，一位小数，和表字段类型不一致时在计划旁注一行再写代码。
 
+> 旁注：表字段 `work_time decimal(5,2)`、`user_id varchar(64)`，无 `deleted`。约定：实体 `workTime` 用 `BigDecimal`、`userId` 用 `Long`；后端只收最多一位小数且 `0 < workTime <= 24`；删除为物理删除；`projectId` 由任务反查，不收前端值。pmhub 只有实体 + Mapper，无 Service / 接口。
+
 1. 实体、Mapper 映射 `pmhub_project_task_work_time`。
 2. `POST /project/task/workTime/add`：body 有 `taskId`、`hours`。`userId` 用当前登录用户，不信前端传的 userId。`hours <= 0` 拒绝。
 3. `POST /project/task/workTime/list`：按 `taskId` 分页，带上登记人昵称（join `sys_user`）。
@@ -61,11 +63,20 @@
 3. insert 一条 `ProjectLog`，`type=task`，`operateType=editTask`，内容用上面的差异。没变化就不写日志。
 4. `@ForUpdate` 可以后补，这版用手写对比就行。
 
+> 旁注：现有 `edit` 不支持改 `closeTime`（`TaskReqVO` 没这个字段），白名单改为 `taskName`、`status`、`userId`（执行人，显示昵称）、`taskPriority`。只对比「前端传了（非 null）且和旧值不同」的字段；多个变化合成一条日志，用「；」分隔，`remark` 仍为「编辑了任务」；content 用纯文本（前端 `TaskDetailDrawer` 直接显示），不学 pmhub 存 JSON。`edit` 补 `@Transactional`。
+
 ### M5 提醒记录（可选）
 
 1. 实体映射 `pmhub_project_task_notify`。
 2. 提供 list：某任务的提醒配置。
 3. `TaskNotifyJob` 只插入「待发送」记录，不调企微。发送留给 Sprint U。
+
+> 旁注：表 `pmhub_project_task_notify` 只有 `id, task_id, user_id(int), user_wx_name, project_id, overdue, close_time, task_name`，**没有发送状态 / 创建时间列**，所以它在 pmhub 里是「已提醒过」的去重记录，不是配置表；提醒配置在 `pmhub_project.msg_notify`（开关）+ `notify_day`（提前几天）。约定：
+> - 拆两步：① 实体 + Mapper + `POST /project/task/notify/list`（按 taskId 查记录，复用 `PROJECT_TASK_DETAIL`）；② `TaskNotifyJob`。
+> - Job 用 TaskForge 现有风格：`@Component("taskNotifyTask")` + 方法，由 Quartz `sys_job.invoke_target` 调用，不用 `@Scheduled`。
+> - 选任务条件：项目 `deleted=0`、`msg_notify=1`、非暂停；任务 `deleted=0`、`close_time` 非空、`status` 不是已完成；`今天到截止日的天数 == notify_day`。
+> - 去重：同一 `task_id + close_time + overdue=0` 已有记录就跳过（比 pmhub 只按 task_id 多带 close_time，截止时间改了还能再提醒）。
+> - 不过滤 `user_wx_name`（TaskForge 不接企微），只打日志、落记录。
 
 ---
 
@@ -91,10 +102,10 @@
 
 ## 3. 验收
 
-- [ ] 阶段增删改查 + 切换当前阶段后新建任务落在新阶段  
-- [ ] 工时登记后列表/汇总正确  
-- [ ] 日志按类型过滤；编辑任务产生字段级或汇总日志  
-- [ ] （若做 M5）notify 表有可读配置/记录  
+- [x] 阶段增删改查 + 切换当前阶段后新建任务落在新阶段  
+- [x] 工时登记后列表/汇总正确  
+- [x] 日志按类型过滤；编辑任务产生字段级或汇总日志  
+- [x] （若做 M5）notify 表有可读配置/记录  
 
 编译：`mvn -pl taskforge-admin -am -DskipTests compile`
 

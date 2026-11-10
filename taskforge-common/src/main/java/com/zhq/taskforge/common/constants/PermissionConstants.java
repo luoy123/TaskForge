@@ -131,6 +131,14 @@ public class PermissionConstants {
     public static final String PROJECT_TASK_BURNDOWN = "project:task:burnDownChart";
 
     /**
+     * 项目阶段（对齐 sys_menu perms；设为当前阶段复用 PROJECT_EDIT）
+     */
+    public static final String PROJECT_STAGE_LIST = "project:stage:list";
+    public static final String PROJECT_STAGE_ADD = "project:stage:add";
+    public static final String PROJECT_STAGE_EDIT = "project:stage:edit";
+    public static final String PROJECT_STAGE_DELETE = "project:stage:delete";
+
+    /**
      * 项目文件（对齐 sys_menu perms）
      */
     public static final String PROJECT_FILE_UPLOAD = "project:file:upload";

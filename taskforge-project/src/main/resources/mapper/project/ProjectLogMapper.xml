@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.project.mapper.ProjectLogMapper">
+
+<select id = "selectTaskLogList" resultType="com.zhq.taskforge.project.domain.vo.task.TaskLogVO">
+
+    select pl.id, pl.log_type, pl.operate_type, pl.content, pl.remark,
+    pl.user_id, pl.created_by, pl.created_time, su.nick_name
+    from pmhub_project_log pl
+    left join sys_user su on su.user_id = pl.user_id
+    where pl.pt_id = #{taskId}
+    and pl.type = 'task'
+    <choose>
+      <when test="logType == 1">
+      <!-- 只要编辑任务的记录 -->
+      and pl.log_type = 1 and pl.operate_type = 'editTask'
+      </when>
+      <when test= "logType == 2 or logType == 3">
+      <!-- 交付物2，评论3，直接通过logtype进行过滤 -->
+      and pl.log_type = #{logType}
+      </when>
+      <otherwise>
+      <!-- -1 或者Null展示全部 -->
+      and (
+        (pl.log_type = 1 and pl.operate_type = 'editTask')
+        or pl.log_type = 2
+        or pl.log_type = 3
+      )
+      </otherwise>
+    </choose>
+    order by pl.created_time desc
+</select>
+</mapper>

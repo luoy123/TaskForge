@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.project.mapper.ProjectTaskWorkTimeMapper">
+
+<select id = "selectWorkTimeList" resultType="com.zhq.taskforge.project.domain.vo.task.WorkTimeResVO">
+select wt.id as workTimeId, wt.project_task_id as taskId,wt.work_time,wt.user_id,su.nick_name,wt.created_time
+from pmhub_project_task_work_time wt left join sys_user su on wt.user_id = su.user_id
+where wt.project_task_id = #{taskId}
+order by wt.created_time desc
+</select>
+</mapper>
