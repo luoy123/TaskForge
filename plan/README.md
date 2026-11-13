@@ -16,8 +16,8 @@ plan/
 ## 后端 `backend/`
 
 ```text
-✅ A–L   系统 → 项目任务文件 → Flowable 主路径 → 统计逾期 → 护栏 → 定时任务 → 审批打磨
-○ M→W    见总排期，做完即覆盖 pmhub-boot 业务功能面
+✅ A–N   系统 → 项目任务文件 → Flowable 主路径 → 统计逾期 → 护栏 → 定时任务 → 审批打磨 → 项目加深 → 监控
+○ O→W    见总排期，做完即覆盖 pmhub-boot 业务功能面
 ```
 
 总览（含人日与覆盖表）：[backend/01-backend-roadmap.md](./backend/01-backend-roadmap.md)
@@ -33,7 +33,7 @@ plan/
 | [11-sprint-k-quartz-admin.md](./backend/11-sprint-k-quartz-admin.md) | K Job 管理端 | ✅ API（验收勾选可再补） |
 | [12-sprint-l-workflow-polish.md](./backend/12-sprint-l-workflow-polish.md) | L 审批打磨 | ✅ |
 | [13-sprint-m-project-deepen.md](./backend/13-sprint-m-project-deepen.md) | M 项目域加深 | ✅ |
-| [14-sprint-n-monitor-server.md](./backend/14-sprint-n-monitor-server.md) | N 服务/缓存监控 | ○ 下一刀 |
+| [14-sprint-n-monitor-server.md](./backend/14-sprint-n-monitor-server.md) | N 服务/缓存监控 | ✅（403 待收尾） |
 | [15-sprint-o-generator.md](./backend/15-sprint-o-generator.md) | O 代码生成 | ○ |
 | [16-sprint-p-workflow-platform.md](./backend/16-sprint-p-workflow-platform.md) | P 流程平台 | ○ |
 | [17-sprint-q-system-task-gap.md](./backend/17-sprint-q-system-task-gap.md) | Q 系统/任务边角 | ○ |
@@ -66,7 +66,7 @@ plan/
 | [12-sprint-materials.md](./frontend/12-sprint-materials.md) | R | ○ |
 | [13-sprint-document.md](./frontend/13-sprint-document.md) | S | ○ |
 | [14-sprint-public-file.md](./frontend/14-sprint-public-file.md) | T | ○ |
-| [15-sprint-monitor.md](./frontend/15-sprint-monitor.md) | N | ○ |
+| [15-sprint-monitor.md](./frontend/15-sprint-monitor.md) | N | ✅ |
 | [16-sprint-generator.md](./frontend/16-sprint-generator.md) | O | ○ |
 | [17-sprint-message.md](./frontend/17-sprint-message.md) | U | ○ |
 | [18-sprint-websocket.md](./frontend/18-sprint-websocket.md) | V | ○ |
@@ -78,7 +78,7 @@ plan/
 |------|------|
 | 前端少点「建设中」 | [07](./frontend/07-sprint-system-pages.md) 已完成；角色菜单树见 F07-7 |
 | 审批联调 / 前端状态展示 | [08](./frontend/08-sprint-workflow-polish.md) + 后端 [L](./backend/12-sprint-l-workflow-polish.md) |
-| 后端按总排期继续 | [N](./backend/14-sprint-n-monitor-server.md) 起；M 与前端 09 均已完成 |
+| 后端按总排期继续 | [O 代码生成](./backend/15-sprint-o-generator.md) 或业务上更优先的 [P 流程平台](./backend/16-sprint-p-workflow-platform.md)；N 与前端 15 均已完成 |
 | 定时任务冒烟 | 已有 `views/monitor/job` |
 
 ## 约定

@@ -30,6 +30,12 @@ export const constantRoutes = [
         component: () => import('@/views/project/task/index.vue'),
         meta: { title: '任务列表' },
       },
+      // 不能加 name：beforeEach 里 next({ ...to }) 会带着 name 停在 404，动态路由加完也匹配不到
+      {
+        path: ':pathMatch(.*)*',
+        component: () => import('@/views/error/404.vue'),
+        meta: { title: '页面不存在' },
+      },
     ],
   },
 ]

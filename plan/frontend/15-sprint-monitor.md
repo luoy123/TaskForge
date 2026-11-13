@@ -1,7 +1,7 @@
 # 前端 Sprint 15：服务与缓存监控（对齐后端 N）
 
 > **编号**：`plan/frontend/15`  
-> **状态**：排队（等后端 [N](../backend/14-sprint-n-monitor-server.md)）  
+> **状态**：✅ 已完成（2026-11-13，联调通过；另加连接池卡片、全局 404 兜底页）  
 > **目标**：在「系统监控」下增加服务器与 Redis 只读页，方便看进程和缓存是否活着。  
 > **前置**：在线用户、定时任务页已有，本 Sprint 不改它们。  
 > **不做**：Prometheus、曲线图、清缓存按钮（除非后端做了 N3 且你明确要）。
@@ -58,10 +58,15 @@ taskforge-ui/src/
 
 ## 4. 验收标准
 
-- [ ] `/monitor/server` 能看到系统名和 JVM 内存
-- [ ] `/monitor/cache` 能看到内存、连接数和至少一类 key 数量
-- [ ] 侧栏点开是真实页
-- [ ] 无权限用户看不到数据或收到 403
+- [x] `/monitor/server` 能看到系统名和 JVM 内存
+- [x] `/monitor/cache` 能看到内存、连接数和至少一类 key 数量
+- [x] 侧栏点开是真实页
+- [x] 无权限用户看不到数据或收到 403（`test` 用户侧栏无监控菜单；直接输入地址显示 404 兜底页，不白屏）
+
+实际落地补充：
+- 服务器页多一张「数据库连接池（Hikari）」卡片，调后端 N4 `GET /monitor/server/pool`。
+- `router/index.js` 在 RootLayout 下加了不带 name 的 `:pathMatch(.*)*` → `views/error/404.vue`。不能带 name，否则 `beforeEach` 里 `next({ ...to })` 会停在 404。
+- 菜单 114「缓存列表」（`monitor/cache/list`）本 Sprint 未做，仍落到建设中页。
 
 ```bash
 cd taskforge-ui && npm run dev

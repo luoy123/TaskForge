@@ -6,10 +6,18 @@
 
 ## 正在做
 
-- **后端**：Sprint N 服务 / 缓存监控 → [backend/14-sprint-n-monitor-server.md](./backend/14-sprint-n-monitor-server.md)
-- **当前步骤**：还没开始。开局先读计划，拆小步，从 N1 讲起。
+- **后端**：下一个 Sprint 待选：[O 代码生成](./backend/15-sprint-o-generator.md)（排期顺序）或 [P 流程平台](./backend/16-sprint-p-workflow-platform.md)（业务上更优先）。
+- **当前步骤**：Sprint N 与前端 15 已完成并提交（2026-11-13），还没开始新 Sprint。
+- **写到哪**：—
 
 ## 已完成
+
+- **Sprint N 服务 / 缓存监控**（2026-11-13 验收）：
+  - N1 `GET /monitor/server`：Oshi 6.6.5，`Server.copyTo()` 汇总 CPU（两次采样）/ 内存 / JVM / 系统 / 磁盘。
+  - N2 `GET /monitor/cache`：`serverCommands().info()` 挑 4 个字段 + `dbSize` + 三个前缀用 SCAN 计数，不用 KEYS。
+  - N3 `DELETE /monitor/cache/clear?prefix=`：白名单精确匹配，SCAN 每 100 个删一批，单独权限 `monitor:cache:remove`（菜单 2179），`@Log` 用 CLEAN。
+  - N4 `GET /monitor/server/pool`：Hikari `HikariPoolMXBean`，返回 active/idle/total/waiting/max。不引入 Druid。
+- **前端 15 监控页**（2026-11-13 联调通过）：`views/monitor/server`（CPU、内存、服务器、连接池、JVM、磁盘）、`views/monitor/cache`（Redis 概况 + 前缀数量）；路由加了不带 name 的 404 兜底页，无权限用户直接输入地址不再白屏。
 
 - **Sprint M 项目域加深**（2026-11-10 验收）：
   - M1 阶段管理：`/project/stage/*`，阶段增删改查 + 设为当前阶段。
@@ -22,6 +30,11 @@
 
 ## 待收尾
 
+- N 遗留：
+  - 无权限返回 `code=500 "系统内部错误: Access Denied"`，不是 403。在 `GlobalExceptionHandler` 单独处理 `AccessDeniedException` 即可，影响所有接口，改完要先 install framework。
+  - N4 格式小点：`HiKari` 拼写、`//2.获取MaxBean` 注释、第 51 行缩进、变量名 `linkedHashMap`；`CacheController` 里「不允许清楚改前缀」文案。
+  - 菜单 114「缓存列表」（`monitor/cache/list`）前后端都没做，仍是建设中页。
+
 - 前端 09 工时「只能删自己的」只用 admin 验过，普通用户登录时可补测一次。
 - M 遗留小点（不影响验收，有空再改）：
   - `ProjectStageServiceImpl.setCurrent` 第 226 行应比 `getProjectStageId()`。
@@ -29,6 +42,10 @@
   - `TaskNotifyJob` 日志只打第一条 taskId。
   - 可选加分：M4 手写白名单重构成注解 + 反射通用版（修掉 pmhub `FieldUtils` 的坑），拿「编辑项目」做第二个使用者。
 - 前端 08：代码已完成，待联调 → [frontend/08](./frontend/08-sprint-workflow-polish.md) §4
+
+## 后续项目
+
+- TaskForge 完成后开工 **FlashTix 闪票**（高并发演出票务 + 营销交易平台），资料统一放在 `E:\FlashTix\docs\`，总览在 `E:\FlashTix\docs\01-总览\FlashTix项目总览.md`
 
 ## 卡住的点 / 下次要问的
 
@@ -47,4 +64,4 @@
 - 一次只推进一个小步骤：先讲 pmhub 里对应的写法和思路，再让我自己写，写完帮我检查。
 - 我说「直接写」时才整段代码给出；骨架可由助手写，关键逻辑留 `【学员填写】`。
 - 思考题直接附答案（放在题目后面）。
-- Controller 这类样板代码可以让助手写，测试我自己来。
+- 从 N2 起，Controller 也由我自己写；助手只讲思路、给提示、写完后检查，不再写骨架。测试也是我自己来。
