@@ -190,4 +190,15 @@ public class PermissionConstants {
     public static final String MONITOR_CACHE_LIST = "monitor:cache:list";
     public static final String MONITOR_CACHE_REMOVE = "monitor:cache:remove";
 
+    /**
+     * 代码生成（Sprint O；对齐 sys_menu 116 及按钮 1055～1060）
+     */
+    public static final String GEN_LIST = "tool:gen:list";
+    public static final String GEN_QUERY = "tool:gen:query";
+    public static final String GEN_EDIT = "tool:gen:edit";
+    public static final String GEN_REMOVE = "tool:gen:remove";
+    public static final String GEN_IMPORT = "tool:gen:import";
+    public static final String GEN_PREVIEW = "tool:gen:preview";
+    public static final String GEN_CODE = "tool:gen:code";
+
 }

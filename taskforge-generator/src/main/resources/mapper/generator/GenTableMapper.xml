@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhq.taskforge.generator.mapper.GenTableMapper">
+
+    <!-- 不给生成器自己、Quartz、Flowable 的表生成代码 -->
+    <sql id="excludeTables">
+        and table_name not like 'qrtz\_%'
+        and table_name not like 'gen\_%'
+        and table_name not like 'ACT\_%'
+        and table_name not like 'FLW\_%'
+    </sql>
+
+    <select id="selectDbTableList" resultType="com.zhq.taskforge.generator.domain.GenTable">
+        select table_name, table_comment, create_time, update_time
+        from information_schema.tables
+        where table_schema = (select database())
+        <include refid="excludeTables"/>
+        and table_name not in (select table_name from gen_table)
+        <if test="t != null and t.tableName != null and t.tableName != ''">
+            and lower(table_name) like lower(concat('%', #{t.tableName}, '%'))
+        </if>
+        <if test="t != null and t.tableComment != null and t.tableComment != ''">
+            and lower(table_comment) like lower(concat('%', #{t.tableComment}, '%'))
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectDbTableListByNames" resultType="com.zhq.taskforge.generator.domain.GenTable">
+        select table_name, table_comment, create_time, update_time
+        from information_schema.tables
+        where table_schema = (select database())
+        <include refid="excludeTables"/>
+        and table_name in
+        <foreach collection="tableNames" item="name" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </select>
+
+</mapper>

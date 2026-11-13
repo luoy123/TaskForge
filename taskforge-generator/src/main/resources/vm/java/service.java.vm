@@ -1,0 +1,28 @@
+package ${packageName}.service;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import ${packageName}.domain.${ClassName};
+
+/**
+ * ${functionName}Service
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+public interface I${ClassName}Service {
+
+    /** 分页查询${functionName}列表 */
+    Page<${ClassName}> select${ClassName}Page(Long pageNum, Long pageSize, ${ClassName} ${className});
+
+    /** 查询${functionName} */
+    ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField});
+
+    /** 新增${functionName} */
+    void insert${ClassName}(${ClassName} ${className});
+
+    /** 修改${functionName}（只更新非空字段） */
+    void update${ClassName}(${ClassName} ${className});
+
+    /** 批量删除${functionName} */
+    void delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaType}[] ${pkColumn.javaField}s);
+}

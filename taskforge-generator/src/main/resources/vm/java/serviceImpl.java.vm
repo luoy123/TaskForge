@@ -1,0 +1,102 @@
+package ${packageName}.service.impl;
+
+#if($hasCreateTime || $hasUpdateTime)
+import java.time.LocalDateTime;
+#end
+import java.util.Arrays;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+#if($hasCreateBy || $hasUpdateBy)
+import com.zhq.taskforge.common.utils.SecurityUtils;
+#end
+import ${packageName}.domain.${ClassName};
+import ${packageName}.mapper.${ClassName}Mapper;
+import ${packageName}.service.I${ClassName}Service;
+
+/**
+ * ${functionName}Service 实现
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Service
+public class ${ClassName}ServiceImpl implements I${ClassName}Service {
+
+    @Autowired
+    private ${ClassName}Mapper ${className}Mapper;
+
+    @Override
+    public Page<${ClassName}> select${ClassName}Page(Long pageNum, Long pageSize, ${ClassName} ${className}) {
+        if (${className} == null) {
+            ${className} = new ${ClassName}();
+        }
+        LambdaQueryWrapper<${ClassName}> qw = new LambdaQueryWrapper<>();
+#foreach ($column in $columns)
+#if($column.isQuery == '1')
+#set($getter = "${className}.get${column.capJavaField}()")
+#if($column.javaType == 'String')
+#set($condition = "StringUtils.hasText($getter)")
+#else
+#set($condition = "$getter != null")
+#end
+#if($column.queryType == 'LIKE')
+#set($op = 'like')
+#elseif($column.queryType == 'NE')
+#set($op = 'ne')
+#elseif($column.queryType == 'GT')
+#set($op = 'gt')
+#elseif($column.queryType == 'GTE')
+#set($op = 'ge')
+#elseif($column.queryType == 'LT')
+#set($op = 'lt')
+#elseif($column.queryType == 'LTE')
+#set($op = 'le')
+#else
+#set($op = 'eq')
+#end
+        qw.${op}(${condition}, ${ClassName}::get${column.capJavaField}, ${getter});
+#end
+#end
+        qw.orderByDesc(${ClassName}::get${pkColumn.capJavaField});
+        return ${className}Mapper.selectPage(new Page<>(pageNum, pageSize), qw);
+    }
+
+    @Override
+    public ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField}) {
+        return ${className}Mapper.selectById(${pkColumn.javaField});
+    }
+
+    @Override
+    public void insert${ClassName}(${ClassName} ${className}) {
+#if($hasCreateBy)
+        ${className}.setCreateBy(SecurityUtils.getUsername());
+#end
+#if($hasCreateTime)
+        ${className}.setCreateTime(LocalDateTime.now());
+#end
+        ${className}Mapper.insert(${className});
+    }
+
+    @Override
+    public void update${ClassName}(${ClassName} ${className}) {
+#if($hasUpdateBy)
+        ${className}.setUpdateBy(SecurityUtils.getUsername());
+#end
+#if($hasUpdateTime)
+        ${className}.setUpdateTime(LocalDateTime.now());
+#end
+        ${className}Mapper.updateById(${className});
+    }
+
+    @Override
+    public void delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaType}[] ${pkColumn.javaField}s) {
+        if (${pkColumn.javaField}s != null && ${pkColumn.javaField}s.length > 0) {
+            ${className}Mapper.deleteByIds(Arrays.asList(${pkColumn.javaField}s));
+        }
+    }
+}

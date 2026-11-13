@@ -1,3 +1,10 @@
 spring:
   profiles:
     active: dev
+
+# 代码生成（对照 pmhub-generator generator.yml）
+gen:
+  author: zhq
+  packageName: com.zhq.taskforge.system
+  autoRemovePre: false
+  tablePrefix: sys_
