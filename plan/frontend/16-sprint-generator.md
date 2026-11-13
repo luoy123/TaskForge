@@ -1,7 +1,7 @@
 # 前端 Sprint 16：代码生成（对齐后端 O）
 
 > **编号**：`plan/frontend/16`  
-> **状态**：排队（等后端 [O](../backend/15-sprint-o-generator.md)）  
+> **状态**：✅ 已完成（2026-11-13 联调通过）  
 > **目标**：从数据库选表导入，改生成配置，预览源码并下载 zip。  
 > **不做**：写入本机工程目录、给 Flowable 表或 `gen_table` 自身生成代码。
 
@@ -68,10 +68,10 @@ taskforge-ui/src/
 
 ## 4. 验收标准
 
-- [ ] `sys_notice` 能导入、改包名、预览到 Controller 源码
-- [ ] 下载的 zip 能打开，里面有上述几类文件
-- [ ] 页面上没有「生成到磁盘」
-- [ ] 菜单不进 `building`
+- [x] `sys_notice` 能导入、改包名、预览到 Controller 源码
+- [x] 下载的 zip 能打开，里面有上述几类文件
+- [x] 页面上没有「生成到磁盘」
+- [x] 菜单不进 `building`
 
 ```bash
 cd taskforge-ui && npm run dev

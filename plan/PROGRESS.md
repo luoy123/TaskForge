@@ -6,11 +6,19 @@
 
 ## 正在做
 
-- **后端**：下一个 Sprint 待选：[O 代码生成](./backend/15-sprint-o-generator.md)（排期顺序）或 [P 流程平台](./backend/16-sprint-p-workflow-platform.md)（业务上更优先）。
-- **当前步骤**：Sprint N 与前端 15 已完成并提交（2026-11-13），还没开始新 Sprint。
+- **后端**：[Sprint P 流程平台](./backend/16-sprint-p-workflow-platform.md)（前端对应 [frontend/10](./frontend/10-sprint-workflow-platform.md)）。
+- **当前步骤**：还没开始，下次从 P 的第一步开始，先读计划文件。
 - **写到哪**：—
 
 ## 已完成
+
+- **Sprint O 代码生成 + 前端 16**（2026-11-13 验收，O2-3 起由助手代写）：
+  - 新模块 `taskforge-generator`：`VelocityConfig` 单例引擎、非静态 `GenConfig`（`application.yml` 的 `gen:`），由 `GenTableServiceImpl` 注入后当参数传给静态 `GenUtils`。
+  - 导入：`information_schema` 读表和列，排除 qrtz/gen/ACT/FLW；`GenUtils` 推断 Java 类型、查询方式、控件；去重、已导入报错，事务。
+  - `/tool/gen`：list、db/list、`{tableId}`、importTable、PUT（只改白名单字段，列必须属于该表）、DELETE（连列一起删）、preview、download（zip，`filename*=utf-8''`），权限 `tool:gen:*`。
+  - 6 个模板改成 TaskForge 风格：MP `BaseMapper` + `LambdaQueryWrapper`、`R<Page<X>>`、`hasAnyAuthority`、`@Log`、`LocalDateTime`。只做 crud 单表。
+  - 测试：generator 7 个、admin 9 个；生成的 `sys_notice` 代码用 javac 编译通过。
+  - 前端 `views/tool/gen`：导入弹窗、编辑（基本 / 字段 / 生成信息三页签）、预览（按文件切换）、下载 zip、删除。浏览器联调全流程通过，操作日志 4 条均成功。
 
 - **Sprint N 服务 / 缓存监控**（2026-11-13 验收）：
   - N1 `GET /monitor/server`：Oshi 6.6.5，`Server.copyTo()` 汇总 CPU（两次采样）/ 内存 / JVM / 系统 / 磁盘。

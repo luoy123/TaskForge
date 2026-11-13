@@ -34,7 +34,7 @@ plan/
 | [12-sprint-l-workflow-polish.md](./backend/12-sprint-l-workflow-polish.md) | L 审批打磨 | ✅ |
 | [13-sprint-m-project-deepen.md](./backend/13-sprint-m-project-deepen.md) | M 项目域加深 | ✅ |
 | [14-sprint-n-monitor-server.md](./backend/14-sprint-n-monitor-server.md) | N 服务/缓存监控 | ✅（403 待收尾） |
-| [15-sprint-o-generator.md](./backend/15-sprint-o-generator.md) | O 代码生成 | ○ |
+| [15-sprint-o-generator.md](./backend/15-sprint-o-generator.md) | O 代码生成 | ✅ |
 | [16-sprint-p-workflow-platform.md](./backend/16-sprint-p-workflow-platform.md) | P 流程平台 | ○ |
 | [17-sprint-q-system-task-gap.md](./backend/17-sprint-q-system-task-gap.md) | Q 系统/任务边角 | ○ |
 | [18-sprint-r-materials.md](./backend/18-sprint-r-materials.md) | R 物料 | ○ |
@@ -67,7 +67,7 @@ plan/
 | [13-sprint-document.md](./frontend/13-sprint-document.md) | S | ○ |
 | [14-sprint-public-file.md](./frontend/14-sprint-public-file.md) | T | ○ |
 | [15-sprint-monitor.md](./frontend/15-sprint-monitor.md) | N | ✅ |
-| [16-sprint-generator.md](./frontend/16-sprint-generator.md) | O | ○ |
+| [16-sprint-generator.md](./frontend/16-sprint-generator.md) | O | ✅ |
 | [17-sprint-message.md](./frontend/17-sprint-message.md) | U | ○ |
 | [18-sprint-websocket.md](./frontend/18-sprint-websocket.md) | V | ○ |
 | [19-sprint-async-admin.md](./frontend/19-sprint-async-admin.md) | W 可选 | ○ |
@@ -78,7 +78,7 @@ plan/
 |------|------|
 | 前端少点「建设中」 | [07](./frontend/07-sprint-system-pages.md) 已完成；角色菜单树见 F07-7 |
 | 审批联调 / 前端状态展示 | [08](./frontend/08-sprint-workflow-polish.md) + 后端 [L](./backend/12-sprint-l-workflow-polish.md) |
-| 后端按总排期继续 | [O 代码生成](./backend/15-sprint-o-generator.md) 或业务上更优先的 [P 流程平台](./backend/16-sprint-p-workflow-platform.md)；N 与前端 15 均已完成 |
+| 后端按总排期继续 | [P 流程平台](./backend/16-sprint-p-workflow-platform.md)；N、O 与前端 15、16 均已完成 |
 | 定时任务冒烟 | 已有 `views/monitor/job` |
 
 ## 约定
