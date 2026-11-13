@@ -183,4 +183,11 @@ public class PermissionConstants {
     public static final String ONLINE_LIST = "monitor:online:list";
     public static final String ONLINE_FORCE_LOGOUT = "monitor:online:forceLogout";
 
+    /**
+     * 服务 / 缓存监控（Sprint N）
+     */
+    public static final String MONITOR_SERVER_LIST = "monitor:server:list";
+    public static final String MONITOR_CACHE_LIST = "monitor:cache:list";
+    public static final String MONITOR_CACHE_REMOVE = "monitor:cache:remove";
+
 }

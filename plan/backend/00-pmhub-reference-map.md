@@ -60,7 +60,7 @@ POST /login
 | DataScope | DataScopeAspect | ✅（Sprint D） |
 | 验证码 | CaptchaController + Kaptcha | 后置 |
 | 在线用户 | SysUserOnlineController | 后置 |
-| 服务/缓存监控 | ServerController / CacheController | 后置 |
+| 服务/缓存监控 | ServerController / CacheController | ✅（Sprint N，Druid 改为 Hikari 连接池接口） |
 | 岗位-用户关联深度能力 | sys_user_post | 按需 |
 | OAuth2 / SSO | OAuth2ServiceImpl | 后置（oa） |
 

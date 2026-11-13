@@ -1,6 +1,6 @@
 # Sprint N：服务与缓存监控（自学版）
 
-> **状态**：排队（可与 M 对调，偏运维演示时先做）  
+> **状态**：✅ 已完成（2026-11-13，前端 15 联调通过；无权限返回 500 而非 403 记入待收尾）  
 > **估算**：2～3 人日  
 > **目标**：对照 pmhub `ServerController` / `CacheController`，提供进程与 Redis 监控只读 API（+ 可选清缓存）。  
 > **前置**：Redis 已用（Token / 验证码 / 限流）。  
@@ -63,9 +63,9 @@ taskforge-admin：
 
 ## 2. 验收
 
-- [ ] `/monitor/server` 返回非空数值字段  
-- [ ] `/monitor/cache` 能看到 Redis 连通与若干 key 模式  
-- [ ] 无权限用户 403  
+- [x] `/monitor/server` 返回非空数值字段  
+- [x] `/monitor/cache` 能看到 Redis 连通与若干 key 模式  
+- [ ] 无权限用户 403（目前已拒绝，但返回 `code=500 Access Denied`，待修 `GlobalExceptionHandler`）  
 
 ---
 
